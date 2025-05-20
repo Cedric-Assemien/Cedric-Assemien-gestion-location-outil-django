@@ -1,0 +1,293 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Modifier {{ tool.name }} - ToolRental{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Modifier l'outil</h2>
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteConfirmModal">
+                        <i class="fa fa-trash"></i> Supprimer
+                    </button>
+                </div>
+                
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Affichage des erreurs générales du formulaire -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Champs du formulaire principal -->
+                        <div class="form-group">
+                            <label for="{{ form.name.id_for_label }}">Nom de l'outil *</label>
+                            {{ form.name }}
+                            <script>document.getElementById("{{ form.name.id_for_label }}").classList.add("form-control");</script>
+                            {% if form.name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.name.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.category.id_for_label }}">Catégorie *</label>
+                            {{ form.category }}
+                            <script>document.getElementById("{{ form.category.id_for_label }}").classList.add("form-control");</script>
+                            {% if form.category.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.category.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.description.id_for_label }}">Description *</label>
+                            {{ form.description }}
+                            <script>document.getElementById("{{ form.description.id_for_label }}").classList.add("form-control");</script>
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.description.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="{{ form.price_per_day.id_for_label }}">Prix par jour (€) *</label>
+                                {{ form.price_per_day }}
+                                <script>document.getElementById("{{ form.price_per_day.id_for_label }}").classList.add("form-control");</script>
+                                {% if form.price_per_day.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.price_per_day.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group col-md-6">
+                                <label for="{{ form.deposit_amount.id_for_label }}">Caution (€) *</label>
+                                {{ form.deposit_amount }}
+                                <script>document.getElementById("{{ form.deposit_amount.id_for_label }}").classList.add("form-control");</script>
+                                {% if form.deposit_amount.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.deposit_amount.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.condition.id_for_label }}">État de l'outil *</label>
+                            {{ form.condition }}
+                            <script>document.getElementById("{{ form.condition.id_for_label }}").classList.add("form-control");</script>
+                            {% if form.condition.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.condition.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.location.id_for_label }}">Localisation</label>
+                            {{ form.location }}
+                            <script>document.getElementById("{{ form.location.id_for_label }}").classList.add("form-control");</script>
+                            {% if form.location.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.location.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Champ is_available caché ou avec une valeur par défaut -->
+                        {% if user.is_staff or user.is_superuser %}
+                            <div class="form-group">
+                                <div class="custom-control custom-checkbox">
+                                    {{ form.is_available }}
+                                    <script>document.getElementById("{{ form.is_available.id_for_label }}").classList.add("custom-control-input");</script>
+                                    <label class="custom-control-label" for="{{ form.is_available.id_for_label }}">
+                                        Disponible immédiatement (approbation)
+                                    </label>
+                                </div>
+                                {% if form.is_available.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.is_available.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            {% if tool.is_available %}
+                                <div class="alert alert-success">
+                                    <i class="fa fa-check-circle"></i> Cette annonce est approuvée et visible sur le site.
+                                </div>
+                            {% else %}
+                                <div class="alert alert-warning">
+                                    <i class="fa fa-clock"></i> Cette annonce est en attente de validation par nos équipes.
+                                </div>
+                            {% endif %}
+                            {{ form.is_available }}
+                        {% endif %}
+                        
+                        <!-- Formset pour les images -->
+                        <h4 class="mt-4 mb-3">Images de l'outil</h4>
+                        {% if not tool.images.all %}
+                            <div class="alert alert-warning">
+                                <i class="fa fa-exclamation-triangle"></i> Veuillez ajouter au moins une image de votre outil.
+                            </div>
+                        {% endif %}
+                        
+                        {{ formset.management_form }}
+                        <div id="image-formset">
+                            {% for form in formset %}
+                                <div class="card mb-3 formset-form">
+                                    <div class="card-body">
+                                        <div class="form-row">
+                                            <div class="col-md-8">
+                                                <div class="form-group">
+                                                    <label>Image</label>
+                                                    {% if form.instance.image %}
+                                                        <div class="mb-2">
+                                                            <img src="{{ form.instance.image.url }}" alt="Image actuelle" style="max-height: 100px; max-width: 100%;">
+                                                        </div>
+                                                    {% endif %}
+                                                    {{ form.image }}
+                                                    <script>
+                                                        if (document.getElementById("{{ form.image.id_for_label }}")) {
+                                                            document.getElementById("{{ form.image.id_for_label }}").classList.add("form-control-file");
+                                                        }
+                                                    </script>
+                                                    {% if form.image.errors %}
+                                                        <div class="invalid-feedback d-block">
+                                                            {% for error in form.image.errors %}
+                                                                {{ error }}
+                                                            {% endfor %}
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <div class="custom-control custom-checkbox mt-4">
+                                                        {{ form.is_primary }}
+                                                        <script>
+                                                            if (document.getElementById("{{ form.is_primary.id_for_label }}")) {
+                                                                document.getElementById("{{ form.is_primary.id_for_label }}").classList.add("custom-control-input");
+                                                            }
+                                                        </script>
+                                                        <label class="custom-control-label" for="{{ form.is_primary.id_for_label }}">
+                                                            Image principale
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {% if formset.can_delete %}
+                                            <div class="form-group">
+                                                <div class="custom-control custom-checkbox">
+                                                    {{ form.DELETE }}
+                                                    <script>
+                                                        if (document.getElementById("{{ form.DELETE.id_for_label }}")) {
+                                                            document.getElementById("{{ form.DELETE.id_for_label }}").classList.add("custom-control-input");
+                                                        }
+                                                    </script>
+                                                    <label class="custom-control-label" for="{{ form.DELETE.id_for_label }}">
+                                                        Supprimer cette image
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        {% for hidden in form.hidden_fields %}
+                                            {{ hidden }}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="form-group text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fa fa-save"></i> Enregistrer les modifications
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation de suppression -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteConfirmModalLabel">Confirmer la suppression</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer l'outil <strong>{{ tool.name }}</strong> ?</p>
+                <p class="text-danger"><strong>Attention :</strong> Cette action est irréversible. Toutes les données associées à cet outil seront définitivement supprimées.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                <form action="{% url 'tools:delete' tool.id %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Supprimer définitivement</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Script pour gérer la sélection d'une seule image principale
+    document.addEventListener('DOMContentLoaded', function() {
+        // Pour chaque checkbox is_primary
+        var primaryCheckboxes = document.querySelectorAll('input[name$="-is_primary"]');
+        primaryCheckboxes.forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                if(this.checked) {
+                    // Décocher tous les autres
+                    primaryCheckboxes.forEach(function(otherCheckbox) {
+                        if(otherCheckbox !== checkbox) {
+                            otherCheckbox.checked = false;
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

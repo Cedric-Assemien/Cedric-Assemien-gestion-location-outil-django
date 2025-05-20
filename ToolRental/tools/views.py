@@ -182,6 +182,17 @@ def edit_tool(request, tool_id):
     
     return render(request, 'tools/tool_edit.html', context)
 
+@login_required
+def delete_tool(request, tool_id):
+    tool = get_object_or_404(Tool, id=tool_id, owner=request.user)
+    
+    if request.method == 'POST':
+        tool_name = tool.name
+        tool.delete()
+        messages.success(request, f"L'outil '{tool_name}' a été supprimé avec succès.")
+        return redirect('tools:my_tools')
+    
+    return redirect('tools:edit', tool_id=tool.id)
 def category_list(request):
     categories = Category.objects.all()
     

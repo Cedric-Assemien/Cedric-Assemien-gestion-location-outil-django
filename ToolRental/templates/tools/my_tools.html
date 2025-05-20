@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes Outils - ToolRental{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>Mes Outils</h1>
+            <p class="text-muted">Gérez vos outils et vos annonces</p>
+        </div>
+        
+        <div class="col-md-4 text-right">
+            <a href="{% url 'tools:add' %}" class="btn btn-success">
+                <i class="fa fa-plus"></i> Créer une nouvelle annonce
+            </a>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="alert alert-info">
+                <i class="fa fa-info-circle"></i> Les nouvelles annonces sont soumises à validation par l'administrateur avant d'être publiées sur le site.
+            </div>
+        </div>
+    </div>
+    
+    <!-- Liste des outils -->
+    <div class="row">
+        {% for tool in tools %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    {% if tool.images.exists %}
+                        {% with tool.images.first as image %}
+                            <img src="{{ image.image.url }}" class="card-img-top" alt="{{ tool.name }}">
+                        {% endwith %}
+                    {% else %}
+                        <img src="{% static 'img/tools/default.jpg' %}" class="card-img-top" alt="{{ tool.name }}">
+                    {% endif %}
+                    
+                    <div class="card-body">
+                        <h5 class="card-title">{{ tool.name }}</h5>
+                        <p class="card-text">{{ tool.description|truncatechars:80 }}</p>
+                        <p class="text-primary font-weight-bold">{{ tool.price_per_day }} € / jour</p>
+                        
+                        <!-- Statut de l'annonce -->
+                        <div class="mt-2">
+                            {% if tool.is_available %}
+                                <span class="badge badge-success">Publié</span>
+                            {% else %}
+                                <span class="badge badge-warning">En attente de validation</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer d-flex justify-content-between align-items-center">
+                        <span class="badge badge-{{ tool.condition|yesno:'success,warning,danger' }}">
+                            {{ tool.get_condition_display }}
+                        </span>
+                        <div>
+                            <a href="{% url 'tools:edit' tool.id %}" class="btn btn-sm btn-outline-secondary mr-1">
+                                <i class="fa fa-edit"></i> Modifier
+                            </a>
+                            <a href="{% url 'tools:detail' tool.id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fa fa-eye"></i> Voir
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-warning">
+                    <i class="fa fa-exclamation-triangle"></i> Vous n'avez pas encore ajouté d'outils.
+                    <a href="{% url 'tools:add' %}" class="alert-link">Créez votre première annonce</a> maintenant !
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Guide d'utilisation -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Comment ça marche ?</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="rounded-circle bg-light p-4 d-inline-block">
+                                <i class="fa fa-plus-circle fa-3x text-primary"></i>
+                            </div>
+                            <h5 class="mt-3">1. Créez votre annonce</h5>
+                            <p>Ajoutez des photos et une description détaillée de votre outil</p>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="rounded-circle bg-light p-4 d-inline-block">
+                                <i class="fa fa-check-circle fa-3x text-primary"></i>
+                            </div>
+                            <h5 class="mt-3">2. Validation par l'admin</h5>
+                            <p>Notre équipe vérifie vos informations avant publication</p>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="rounded-circle bg-light p-4 d-inline-block">
+                                <i class="fa fa-handshake fa-3x text-primary"></i>
+                            </div>
+                            <h5 class="mt-3">3. Location et gains</h5>
+                            <p>Recevez des demandes de location et gagnez de l'argent</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

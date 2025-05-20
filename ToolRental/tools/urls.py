@@ -10,6 +10,8 @@ urlpatterns = [
     path('tools/add/', views.add_tool, name='add'),
     path('my-tools/', views.my_tools, name='my_tools'),
     path('tools/<int:tool_id>/edit/', views.edit_tool, name='edit'),
+    
+    path('tools/<int:tool_id>/delete/', views.delete_tool, name='delete'),
     path('categories/', views.category_list, name='categories'),
     path('categories/<int:category_id>/', views.category_detail, name='category_detail'),
     path('search/', views.tool_list, name='search'),
