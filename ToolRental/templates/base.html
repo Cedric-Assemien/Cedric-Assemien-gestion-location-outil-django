@@ -97,9 +97,9 @@
                                     <li class="{% if 'about' in request.path %}active{% endif %}">
                                         <a href="{% url 'tools:about' %}">À propos</a>
                                     </li>
-                                    <li class="{% if 'contact' in request.path %}active{% endif %}">
+                                    {% comment %} <li class="{% if 'contact' in request.path %}active{% endif %}">
                                         <a href="{% url 'tools:contact' %}">Contact</a>
-                                    </li>
+                                    </li> {% endcomment %}
                                 </ul>
                             </nav>
                         </div>

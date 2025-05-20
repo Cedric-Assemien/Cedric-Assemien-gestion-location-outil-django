@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mon Profil - ToolRental{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">{{ user.username }}</h4>
+                </div>
+                <div class="card-body text-center">
+                    {% if user.profile.profile_picture %}
+                        <img src="{{ user.profile.profile_picture.url }}" alt="Photo de profil" class="rounded-circle img-fluid mb-3" style="max-width: 150px;">
+                    {% else %}
+                        <img src="{% static 'img/profiles/default.png' %}" alt="Photo de profil par défaut" class="rounded-circle img-fluid mb-3" style="max-width: 150px;">
+                    {% endif %}
+                    <h5>{{ user.first_name }} {{ user.last_name }}</h5>
+                    <p class="text-muted">{{ user.profile.get_user_type_display }}</p>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% if user.email %}
+                        <li class="list-group-item"><i class="far fa-envelope mr-2"></i> {{ user.email }}</li>
+                    {% endif %}
+                    {% if user.profile.phone %}
+                        <li class="list-group-item"><i class="far fa-phone mr-2"></i> {{ user.profile.phone }}</li>
+                    {% endif %}
+                    {% if user.profile.city %}
+                        <li class="list-group-item"><i class="far fa-map-marker-alt mr-2"></i> {{ user.profile.city }}</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h4>Modifier mon profil</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Informations personnelles</h5>
+                                {{ u_form.as_p }}
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Informations complémentaires</h5>
+                                {{ p_form.as_p }}
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Mettre à jour</button>
+                    </form>
+                </div>
+            </div>
+            
+            {% if is_proprietaire %}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">Mes outils</h4>
+                        <a href="{% url 'tools:add' %}" class="btn btn-sm btn-success">Ajouter un outil</a>
+                    </div>
+                    <div class="card-body">
+                        {% if tools %}
+                            <div class="row">
+                                {% for tool in tools %}
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card h-100">
+                                            {% if tool.images.exists %}
+                                                <img src="{{ tool.images.first.image.url }}" class="card-img-top" alt="{{ tool.name }}">
+                                            {% endif %}
+                                            <div class="card-body">
+                                                <h5 class="card-title">{{ tool.name }}</h5>
+                                                <p class="card-text">{{ tool.price_per_day }} € / jour</p>
+                                            </div>
+                                            <div class="card-footer">
+                                                <a href="{% url 'tools:detail' tool.id %}" class="btn btn-sm btn-primary">Voir</a>
+                                                <a href="{% url 'tools:edit' tool.id %}" class="btn btn-sm btn-secondary">Modifier</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="text-center mt-3">
+                                <a href="{% url 'tools:my_tools' %}" class="btn btn-outline-primary">Voir tous mes outils</a>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info">
+                                Vous n'avez pas encore ajouté d'outils. <a href="{% url 'tools:add' %}">Commencer maintenant</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+            
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4>Mes réservations récentes</h4>
+                </div>
+                <div class="card-body">
+                    {% if reservations %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Outil</th>
+                                        <th>Dates</th>
+                                        <th>Statut</th>
+                                        <th>Prix</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for res in reservations %}
+                                        <tr>
+                                            <td>{{ res.tool.name }}</td>
+                                            <td>{{ res.start_date|date:"d/m/Y" }} - {{ res.end_date|date:"d/m/Y" }}</td>
+                                            <td><span class="badge badge-{{ res.status }}">{{ res.get_status_display }}</span></td>
+                                            <td>{{ res.total_price }} €</td>
+                                            <td>
+                                                <a href="#" class="btn btn-sm btn-primary">Détails</a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="{% url 'reservations:my_reservations' %}" class="btn btn-outline-primary">Voir toutes mes réservations</a>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            Vous n'avez pas encore de réservations. <a href="{% url 'tools:list' %}">Parcourir les outils</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

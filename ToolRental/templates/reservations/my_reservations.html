@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes Réservations - ToolRental{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="mb-4">Mes Réservations</h1>
+    
+    {% if reservations %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Outil</th>
+                        <th>Propriétaire</th>
+                        <th>Date de début</th>
+                        <th>Date de fin</th>
+                        <th>Prix total</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reservation in reservations %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'tools:detail' reservation.tool.id %}">
+                                    {{ reservation.tool.name }}
+                                </a>
+                            </td>
+                            <td>{{ reservation.tool.owner.username }}</td>
+                            <td>{{ reservation.start_date|date:"d/m/Y" }}</td>
+                            <td>{{ reservation.end_date|date:"d/m/Y" }}</td>
+                            <td>{{ reservation.total_price }} €</td>
+                            <td>
+                                <span class="badge badge-{% if reservation.status == 'confirmed' %}success{% elif reservation.status == 'pending' %}warning{% elif reservation.status == 'canceled' %}danger{% else %}secondary{% endif %}">
+                                    {{ reservation.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if reservation.status == 'pending' %}
+                                    <a href="#" class="btn btn-sm btn-danger">Annuler</a>
+    {% endif %}
+                                
+                                {% if reservation.status == 'completed' and not reservation.review %}
+                                    <a href="#" class="btn btn-sm btn-primary">Donner un avis</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+</div>
+    {% else %}
+        <div class="alert alert-info">
+            <p>Vous n'avez pas encore de réservations.</p>
+            <a href="{% url 'tools:list' %}" class="btn btn-primary mt-2">Explorer les outils disponibles</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

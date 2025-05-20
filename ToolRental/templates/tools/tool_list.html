@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if selected_category %}
+        {{ selected_category.name }} - ToolRental
+    {% elif search_query %}
+        Recherche : {{ search_query }} - ToolRental
+    {% else %}
+        Tous nos outils - ToolRental
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            {% if selected_category %}
+                <h1>Outils de la catégorie : {{ selected_category.name }}</h1>
+            {% elif search_query %}
+                <h1>Résultats pour "{{ search_query }}"</h1>
+            {% else %}
+                <h1>Tous nos outils disponibles</h1>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-4">
+            <form action="{% url 'tools:search' %}" method="GET" class="my-2">
+                <div class="input-group">
+                    <input type="text" name="query" class="form-control" placeholder="Rechercher..." value="{{ search_query|default:'' }}">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="submit">Rechercher</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Filtres sur le côté gauche -->
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Catégories</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'tools:list' %}" class="list-group-item {% if not selected_category %}active{% endif %}">
+                        Tous les outils
+                    </a>
+                    {% for category in categories %}
+                        <a href="{% url 'tools:list' %}?category={{ category.id }}" class="list-group-item {% if selected_category == category.id %}active{% endif %}">
+                            {{ category.name }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Liste des outils -->
+        <div class="col-md-9">
+            <div class="row">
+                {% for tool in tools %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            {% if tool.images.exists %}
+                                {% with tool.images.first as image %}
+                                    <img src="{{ image.image.url }}" class="card-img-top" alt="{{ tool.name }}">
+                                {% endwith %}
+                            {% else %}
+                                <img src="{% static 'img/tools/default.jpg' %}" class="card-img-top" alt="{{ tool.name }}">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ tool.name }}</h5>
+                                <p class="card-text">{{ tool.description|truncatechars:80 }}</p>
+                                <p class="text-primary font-weight-bold">{{ tool.price_per_day }} € / jour</p>
+                            </div>
+                            <div class="card-footer d-flex justify-content-between align-items-center">
+                                <span class="badge badge-{{ tool.condition|yesno:'success,warning,danger' }}">
+                                    {{ tool.get_condition_display }}
+                                </span>
+                                <a href="{% url 'tools:detail' tool.id %}" class="btn btn-sm btn-outline-primary">Voir détails</a>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            Aucun outil ne correspond à votre recherche.
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
