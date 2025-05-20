@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Réserver {{ tool.name }} - ToolRental{% endblock %}
+
+{% block content %}
+<!-- breadcrumb-area-start -->
+<div class="breadcrumb-area pt-125 pb-125" style="background-image:url({% static 'img/bg/04.jpg' %})">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="breadcrumb-wrapper">
+                    <div class="breadcrumb-text">
+                        <h2>Réserver un outil</h2>
+                    </div>
+                    <ul class="breadcrumb-menu">
+                        <li><a href="{% url 'tools:home' %}">Accueil</a></li>
+                        <li><a href="{% url 'tools:detail' tool.id %}">{{ tool.name }}</a></li>
+                        <li><span>Réserver</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- breadcrumb-area-end -->
+
+<!-- Reservation Form Area Start -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="tool-image mb-4">
+                    {% if tool.images.filter.exists %}
+                        <img src="{{ tool.images.first.image.url }}" alt="{{ tool.name }}" class="img-fluid">
+                    {% else %}
+                        <img src="{% static 'img/tools/default-tool.jpg' %}" alt="{{ tool.name }}" class="img-fluid">
+                    {% endif %}
+                </div>
+                <div class="tool-details">
+                    <h3>{{ tool.name }}</h3>
+                    <p class="price">{{ tool.price_per_day }} €/jour</p>
+                    <p>{{ tool.description|linebreaks }}</p>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card border-0 shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Formulaire de réservation</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="{% url 'reservations:create' tool.id %}" method="post">
+                            {% csrf_token %}
+                            
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                                {% endfor %}
+                            {% endif %}
+                            
+                            <div class="form-group mb-3">
+                                <label for="start_date">Date de début</label>
+                                <input type="date" id="start_date" name="start_date" class="form-control" value="{{ start_date|date:'Y-m-d' }}" required>
+                            </div>
+                            
+                            <div class="form-group mb-3">
+                                <label for="end_date">Date de fin</label>
+                                <input type="date" id="end_date" name="end_date" class="form-control" value="{{ end_date|date:'Y-m-d' }}" required>
+                            </div>
+                            
+                            <div class="form-group mb-3">
+                                <label for="quantity">Quantité</label>
+                                <input type="number" id="quantity" name="quantity" class="form-control" value="1" min="1" max="10" required>
+                                <small class="form-text text-muted">Nombre d'unités à réserver</small>
+                            </div>
+                            
+                            <div class="pricing-calculation mt-4 mb-4">
+                                <h5>Estimation du prix</h5>
+                                <div class="d-flex justify-content-between">
+                                    <span>Prix par jour:</span>
+                                    <span>{{ tool.price_per_day }} €</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span>Durée estimée:</span>
+                                    <span id="days-count">7 jours</span>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <strong>Total estimé:</strong>
+                                    <strong id="total-price">{{ tool.price_per_day|floatformat:2 }} €</strong>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group mt-4">
+                                <button type="submit" class="c-btn theme-btn btn-block">Ajouter au panier</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Reservation Form Area End -->
+
+{% block extra_js %}
+<script>
+    // Script pour calculer dynamiquement le prix total
+    document.addEventListener('DOMContentLoaded', function() {
+        const startDateInput = document.getElementById('start_date');
+        const endDateInput = document.getElementById('end_date');
+        const quantityInput = document.getElementById('quantity');
+        const daysCountElement = document.getElementById('days-count');
+        const totalPriceElement = document.getElementById('total-price');
+        const pricePerDay = {{ tool.price_per_day }};
+        
+        function updateCalculation() {
+            const startDate = new Date(startDateInput.value);
+            const endDate = new Date(endDateInput.value);
+            const quantity = parseInt(quantityInput.value);
+            
+            if (startDate && endDate && !isNaN(startDate) && !isNaN(endDate)) {
+                const diffTime = Math.abs(endDate - startDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 car le jour de début compte
+                
+                if (diffDays > 0) {
+                    const totalPrice = pricePerDay * diffDays * quantity;
+                    daysCountElement.textContent = `${diffDays} jours`;
+                    totalPriceElement.textContent = `${totalPrice.toFixed(2)} €`;
+                }
+            }
+        }
+        
+        // Mettre à jour le calcul à chaque changement
+        startDateInput.addEventListener('change', updateCalculation);
+        endDateInput.addEventListener('change', updateCalculation);
+        quantityInput.addEventListener('change', updateCalculation);
+        
+        // Calcul initial
+        updateCalculation();
+    });
+</script>
+{% endblock %}
+{% endblock %}

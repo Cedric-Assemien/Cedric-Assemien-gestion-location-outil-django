@@ -13,6 +13,7 @@ urlpatterns = [
     path('categories/', views.category_list, name='categories'),
     path('categories/<int:category_id>/', views.category_detail, name='category_detail'),
     path('search/', views.tool_list, name='search'),
+    path('detail/<int:tool_id>/', views.detail, name='detail'),
     
     # Pages statiques
     path('about/', views.about, name='about'),

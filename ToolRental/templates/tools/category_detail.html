@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ category.name }} - ToolRental{% endblock %}
+
+{% block content %}
+<!-- breadcrumb-area-start -->
+<div class="breadcrumb-area pt-125 pb-125" style="background-image:url({% static 'img/bg/tools-bg.jpg' %})">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="breadcrumb-wrapper">
+                    <div class="breadcrumb-text">
+                        <h2>{{ category.name }}</h2>
+                    </div>
+                    <ul class="breadcrumb-menu">
+                        <li><a href="{% url 'tools:home' %}">Accueil</a></li>
+                       <li><a href="{% url 'tools:categories' %}">Catégories</a></li>
+                        <li><span>{{ category.name }}</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- breadcrumb-area-end -->
+
+<!-- product-area-start -->
+<div class="product-area pt-100 pb-100">
+    <div class="container">
+        <div class="row mb-20">
+            <div class="col-xl-4 col-lg-3 col-md-3">
+                <div class="product-02-tab mb-20">
+                    <ul class="nav justify-content-start product-nav" id="myTab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab"
+                                aria-controls="home" aria-selected="true">
+                                <i class="fas fa-th-large"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab"
+                                aria-controls="profile" aria-selected="false">
+                                <i class="fas fa-bars"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-xl-4 col-lg-5 col-md-5">
+                <div class="pro-tab1-content pt-15 mb-20 text-md-center">
+                    <h4>{{ category.tools.count }} outils dans cette catégorie</h4>
+                </div>
+            </div>
+            <div class="col-xl-4 col-lg-4 col-md-4">
+                <div class="pro-filter mb-20 f-right">
+                    <form action="#">
+                        <select name="pro-filter" id="pro-filter">
+                            <option value="1">Par défaut</option>
+                            <option value="2">Prix croissant</option>
+                            <option value="3">Prix décroissant</option>
+                            <option value="4">Alphabétique</option>
+                        </select>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="product-tab-content">
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                    <div class="row">
+                        {% if category.tools.all %}
+                            {% for tool in category.tools.all %}
+                                <div class="col-xl-4 cl-lg-4 col-md-6">
+                                    <div class="product-wrapper text-center mb-45">
+                                        <div class="product-img pos-rel">
+                                            <a href="{% url 'tools:tool_detail' tool.id %}">
+                                            <a href="{% url 'tools:detail' tool.id %}">
+                                                {% if tool.images.all %}
+                                                    {% with primary_image=tool.images.filter.first %}
+                                                        <img src="{{ primary_image.image.url }}" alt="{{ tool.name }}">
+                                                    {% endwith %}
+                                                {% else %}
+                                                    <img src="{% static 'img/default-tool.jpg' %}" alt="{{ tool.name }}">
+                                                {% endif %}
+                                            </a>
+                                            <div class="product-action">
+                                                <a class="action-btn" href="{% url 'tools:add_to_wishlist' tool.id %}"><i class="far fa-heart"></i></a>
+                                                <a class="c-btn" href="{% url 'rentals:add_to_cart' tool.id %}">Louer <i class="far fa-plus"></i></a>
+                                                <a class="action-btn" href="{% url 'tools:tool_detail' tool.id %}"><i class="far fa-search"></i></a>
+                                                <a class="action-btn" href="#"><i class="far fa-heart"></i></a>
+                                                <a class="c-btn" href="#">Louer <i class="far fa-plus"></i></a>
+                                                <a class="action-btn" href="{% url 'tools:detail' tool.id %}"><i class="far fa-search"></i></a>
+                                            </div>
+                                        </div>
+                                        <div class="product-text">
+                                            <h5>{{ category.name }}</h5>
+                                            <h4><a href="{% url 'tools:tool_detail' tool.id %}">{{ tool.name }}</a></h4>
+                                            <h4><a href="{% url 'tools:detail' tool.id %}">{{ tool.name }}</a></h4>
+                                            <span>{{ tool.price_per_day }} € / jour</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="col-12 text-center">
+                                <p>Aucun outil disponible dans cette catégorie pour le moment.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                    {% if category.tools.all %}
+                        {% for tool in category.tools.all %}
+                            <div class="row">
+                                <div class="col-xl-4 col-lg-4">
+                                    <div class="product mb-30">
+                                        <div class="product-img">
+                                            <a href="{% url 'tools:tool_detail' tool.id %}">
+                                            <a href="{% url 'tools:detail' tool.id %}">
+                                                {% if tool.images.all %}
+                                                    {% with primary_image=tool.images.filter.first %}
+                                                        <img src="{{ primary_image.image.url }}" alt="{{ tool.name }}">
+                                                    {% endwith %}
+                                                {% else %}
+                                                    <img src="{% static 'img/default-tool.jpg' %}" alt="{{ tool.name }}">
+                                                {% endif %}
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xl-8 col-lg-8">
+                                    <div class="product-list-content mb-30">
+                                        <div class="product-text">
+                                            <h5>{{ category.name }}</h5>
+                                            <h4><a href="{% url 'tools:tool_detail' tool.id %}">{{ tool.name }}</a></h4>
+                                            <h4><a href="{% url 'tools:detail' tool.id %}">{{ tool.name }}</a></h4>
+                                            <span>{{ tool.price_per_day }} € / jour</span>
+                                        </div>
+                                        <p>{{ tool.description|truncatewords:30 }}</p>
+                                        <div class="product-action product-02-action">
+                                            <a class="action-btn" href="{% url 'tools:add_to_wishlist' tool.id %}"><i class="far fa-heart"></i></a>
+                                            <a class="c-btn" href="{% url 'rentals:add_to_cart' tool.id %}">Louer <i class="far fa-plus"></i></a>
+                                            <a class="action-btn" href="{% url 'tools:tool_detail' tool.id %}"><i class="far fa-search"></i></a>
+                                            <a class="action-btn" href="#"><i class="far fa-heart"></i></a>
+                                            <a class="c-btn" href="#">Louer <i class="far fa-plus"></i></a>
+                                            <a class="action-btn" href="{% url 'tools:detail' tool.id %}"><i class="far fa-search"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="row">
+                            <div class="col-12 text-center">
+                                <p>Aucun outil disponible dans cette catégorie pour le moment.</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        {% if category.tools.all %}
+        {% if tools.paginator %}
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="basic-pagination mt-20 basic-pagination-2 text-center">
+                        <ul>
+                            {% if tools.has_previous %}
+                                <li><a href="?page={{ tools.previous_page_number }}"><i class="far fa-angle-left"></i></a></li>
+                            {% endif %}
+                            
+                            {% for i in tools.paginator.page_range %}
+                                {% if tools.number == i %}
+                                    <li class="active"><a href="#">{{ i }}</a></li>
+                                {% else %}
+                                    <li><a href="?page={{ i }}">{{ i }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if tools.has_next %}
+                                <li><a href="?page={{ tools.next_page_number }}"><i class="far fa-angle-right"></i></a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+<!-- product-area-end -->
+
+{% endblock %}

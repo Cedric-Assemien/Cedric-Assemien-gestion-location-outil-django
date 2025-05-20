@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Paiement - ToolRental{% endblock %}
+
+{% block content %}
+<!-- breadcrumb-area-start -->
+<div class="breadcrumb-area pt-125 pb-125" style="background-image:url({% static 'img/bg/tools-bg.jpg' %})">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="breadcrumb-wrapper">
+                    <div class="breadcrumb-text">
+                        <h2>Finaliser votre location</h2>
+                    </div>
+                    <ul class="breadcrumb-menu">
+                        <li><a href="{% url 'tools:home' %}">Accueil</a></li>
+                        <li><a href="{% url 'reservations:cart' %}">Panier</a></li>
+                        <li><span>Paiement</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- breadcrumb-area-end -->
+
+<!-- checkout-area start -->
+<section class="checkout-area pb-70 pt-100">
+    <div class="container">
+        <form method="post">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="checkbox-form">
+                        <h3>Informations personnelles</h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="checkout-form-list">
+                                    <label>Prénom <span class="required">*</span></label>
+                                    {{ form.first_name }}
+                                    {% if form.first_name.errors %}
+                                    <div class="text-danger">
+                                        {{ form.first_name.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="checkout-form-list">
+                                    <label>Nom <span class="required">*</span></label>
+                                    {{ form.last_name }}
+                                    {% if form.last_name.errors %}
+                                    <div class="text-danger">
+                                        {{ form.last_name.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="checkout-form-list">
+                                    <label>Email <span class="required">*</span></label>
+                                    {{ form.email }}
+                                    {% if form.email.errors %}
+                                    <div class="text-danger">
+                                        {{ form.email.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="checkout-form-list">
+                                    <label>Adresse <span class="required">*</span></label>
+                                    {{ form.address }}
+                                    {% if form.address.errors %}
+                                    <div class="text-danger">
+                                        {{ form.address.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="checkout-form-list">
+                                    <label>Ville <span class="required">*</span></label>
+                                    {{ form.city }}
+                                    {% if form.city.errors %}
+                                    <div class="text-danger">
+                                        {{ form.city.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="checkout-form-list">
+                                    <label>Code postal <span class="required">*</span></label>
+                                    {{ form.postal_code }}
+                                    {% if form.postal_code.errors %}
+                                    <div class="text-danger">
+                                        {{ form.postal_code.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="checkout-form-list">
+                                    <label>Téléphone <span class="required">*</span></label>
+                                    {{ form.phone }}
+                                    {% if form.phone.errors %}
+                                    <div class="text-danger">
+                                        {{ form.phone.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="order-notes">
+                                    <div class="checkout-form-list">
+                                        <label>Notes sur votre location</label>
+                                        {{ form.note }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="your-order mb-30 ">
+                        <h3>Votre location</h3>
+                        <div class="your-order-table table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th class="product-name">Outil</th>
+                                        <th class="product-total">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in cart.items.all %}
+                                    <tr class="cart_item">
+                                        <td class="product-name">
+                                            {{ item.tool.name }} 
+                                            <strong class="product-quantity"> × {{ item.quantity }}</strong>
+                                            <br>
+                                            <small>Du {{ item.start_date|date:"d/m/Y" }} au {{ item.end_date|date:"d/m/Y" }} ({{ item.get_duration }} jours)</small>
+                                        </td>
+                                        <td class="product-total">
+                                            <span class="amount">{{ item.get_cost }} €</span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr class="cart-subtotal">
+                                        <th>Sous-total</th>
+                                        <td><span class="amount">{{ cart.get_total_price }} €</span></td>
+                                    </tr>
+                                    <tr class="shipping">
+                                        <th>Caution</th>
+                                        <td><span class="amount">100.00 €</span> (remboursée au retour des outils)</td>
+                                    </tr>
+                                    <tr class="order-total">
+                                        <th>Total à payer</th>
+                                        <td><strong><span class="amount">{{ cart.get_total_price }} €</span></strong>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <div class="payment-method">
+                            <div class="accordion" id="accordionExample">
+                                <div class="card">
+                                    <div class="card-header" id="headingOne">
+                                        <h5 class="mb-0">
+                                            <button class="btn-link" type="button" data-toggle="collapse"
+                                                data-target="#collapseOne" aria-expanded="true"
+                                                aria-controls="collapseOne">
+                                                Paiement par carte bancaire
+                                            </button>
+                                        </h5>
+                                    </div>
+
+                                    <div id="collapseOne" class="collapse show" aria-labelledby="headingOne"
+                                        data-parent="#accordionExample">
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-12 mb-3">
+                                                    <label>Numéro de carte <span class="required">*</span></label>
+                                                    <input type="text" class="form-control" placeholder="1234 5678 9012 3456" required>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label>Date d'expiration <span class="required">*</span></label>
+                                                    <input type="text" class="form-control" placeholder="MM/AA" required>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label>CVV <span class="required">*</span></label>
+                                                    <input type="text" class="form-control" placeholder="123" required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-header" id="headingTwo">
+                                        <h5 class="mb-0">
+                                            <button class="btn-link collapsed" type="button" data-toggle="collapse"
+                                                data-target="#collapseTwo" aria-expanded="false"
+                                                aria-controls="collapseTwo">
+                                                Paiement à la remise des outils
+                                            </button>
+                                        </h5>
+                                    </div>
+                                    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo"
+                                        data-parent="#accordionExample">
+                                        <div class="card-body">
+                                            Vous paierez en espèces ou par carte bancaire lors de la remise des outils.
+                                            Une pièce d'identité et un dépôt de garantie seront demandés.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-header" id="headingThree">
+                                        <h5 class="mb-0">
+                                            <button class="btn-link collapsed" type="button" data-toggle="collapse"
+                                                data-target="#collapseThree" aria-expanded="false"
+                                                aria-controls="collapseThree">
+                                                PayPal
+                                            </button>
+                                        </h5>
+                                    </div>
+                                    <div id="collapseThree" class="collapse" aria-labelledby="headingThree"
+                                        data-parent="#accordionExample">
+                                        <div class="card-body">
+                                            Payez via PayPal; vous pouvez payer avec votre carte de crédit si vous n'avez pas de compte PayPal.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="order-button-payment mt-20">
+                                <button type="submit" class="c-btn theme-btn">Confirmer la location</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+<!-- checkout-area end -->
+{% endblock %}

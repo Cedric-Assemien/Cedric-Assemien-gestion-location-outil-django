@@ -119,11 +119,11 @@
                                             <img src="{% static 'img/tools/default-tool.jpg' %}" alt="{{ tool.name }}">
                                         {% endif %}
                                     </a>
-                                    <div class="product-action">
+                                    {% comment %} <div class="product-action">
                                         <a class="action-btn" href="{% url 'tools:add_to_wishlist' tool.id %}"><i class="far fa-heart"></i></a>
                                         <a class="c-btn" href="{% url 'reservations:create' tool.id %}">réserver <i class="far fa-plus"></i></a>
                                         <a class="action-btn" href="{% url 'tools:detail' tool.id %}"><i class="far fa-search"></i></a>
-                                    </div>
+                                    </div> {% endcomment %}
                                 </div>
                                 <div class="product-text">
                                     <h5>{{ tool.category.name }}</h5>
@@ -151,11 +151,11 @@
                                             <img src="{% static 'img/tools/default-tool.jpg' %}" alt="{{ tool.name }}">
                                         {% endif %}
                                     </a>
-                                    <div class="product-action">
+                                    {% comment %} <div class="product-action">
                                         <a class="action-btn" href="{% url 'tools:add_to_wishlist' tool.id %}"><i class="far fa-heart"></i></a>
                                         <a class="c-btn" href="{% url 'reservations:create' tool.id %}">réserver <i class="far fa-plus"></i></a>
                                         <a class="action-btn" href="{% url 'tools:detail' tool.id %}"><i class="far fa-search"></i></a>
-                                    </div>
+                                    </div> {% endcomment %}
                                 </div>
                                 <div class="product-text">
                                     <h5>{{ tool.category.name }}</h5>
@@ -183,11 +183,11 @@
                                             <img src="{% static 'img/tools/default-tool.jpg' %}" alt="{{ tool.name }}">
                                         {% endif %}
                                     </a>
-                                    <div class="product-action">
+                                    {% comment %} <div class="product-action">
                                         <a class="action-btn" href="{% url 'tools:add_to_wishlist' tool.id %}"><i class="far fa-heart"></i></a>
                                         <a class="c-btn" href="{% url 'reservations:create' tool.id %}">réserver <i class="far fa-plus"></i></a>
                                         <a class="action-btn" href="{% url 'tools:detail' tool.id %}"><i class="far fa-search"></i></a>
-                                    </div>
+                                    </div> {% endcomment %}
                                 </div>
                                 <div class="product-text">
                                     <h5>{{ tool.category.name }}</h5>

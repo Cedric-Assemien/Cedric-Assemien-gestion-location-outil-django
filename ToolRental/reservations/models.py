@@ -46,3 +46,33 @@ class Payment(models.Model):
     
     def __str__(self):
         return f"Paiement pour {self.reservation}"
+
+class Cart(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='carts')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def get_total_price(self):
+        return sum(item.get_cost() for item in self.items.all())
+        
+    def __str__(self):
+        return f"Panier de {self.user.username}"
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, related_name='items', on_delete=models.CASCADE)
+    tool = models.ForeignKey(Tool, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    
+    def get_duration(self):
+        """Retourne la durée en jours"""
+        delta = self.end_date - self.start_date
+        return delta.days + 1
+    
+    def get_cost(self):
+        """Calcule le coût total pour cet article"""
+        return self.tool.price_per_day * self.get_duration() * self.quantity
+        
+    def __str__(self):
+        return f"{self.quantity} x {self.tool.name}"

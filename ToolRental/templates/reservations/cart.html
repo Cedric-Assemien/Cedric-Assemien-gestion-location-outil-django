@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Panier de location - ToolRental{% endblock %}
+
+{% block content %}
+<!-- breadcrumb-area-start -->
+<div class="breadcrumb-area pt-125 pb-125" style="background-image:url({% static 'img/bg/tools-bg.jpg' %})">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="breadcrumb-wrapper">
+                    <div class="breadcrumb-text">
+                        <h2>Panier de location</h2>
+                    </div>
+                    <ul class="breadcrumb-menu">
+                        <li><a href="{% url 'tools:home' %}">Accueil</a></li>
+                        <li><span>Panier</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- breadcrumb-area-end -->
+
+<!-- Cart Area Start -->
+<section class="cart-area pt-100 pb-100">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                {% if cart_items %}
+                <form action="{% url 'reservations:cart' %}" method="post">
+                    {% csrf_token %}
+                    <div class="table-content table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th class="product-thumbnail">Images</th>
+                                    <th class="cart-product-name">Outil</th>
+                                    <th class="product-price">Prix par jour</th>
+                                    <th class="product-quantity">Quantité</th>
+                                    <th class="product-date">Période</th>
+                                    <th class="product-subtotal">Total</th>
+                                    <th class="product-remove">Supprimer</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in cart_items %}
+                                <tr>
+                                    <td class="product-thumbnail">
+                                        <a href="{% url 'tools:detail' item.tool.id %}">
+                                            {% if item.tool.images.filter.exists %}
+                                                <img src="{{ item.tool.images.first.image.url }}" alt="{{ item.tool.name }}">
+                                            {% else %}
+                                                <img src="{% static 'img/tools/default-tool.jpg' %}" alt="{{ item.tool.name }}">
+                                            {% endif %}
+                                        </a>
+                                    </td>
+                                    <td class="product-name">
+                                        <a href="{% url 'tools:detail' item.tool.id %}">{{ item.tool.name }}</a>
+                                    </td>
+                                    <td class="product-price">
+                                        <span class="amount">{{ item.tool.price_per_day }} €</span>
+                                    </td>
+                                    <td class="product-quantity">
+                                        <div class="cart-plus-minus">
+                                            <input type="number" name="quantity_{{ item.id }}" value="{{ item.quantity }}" min="1" max="10" />
+                                        </div>
+                                    </td>
+                                    <td class="product-date">
+                                        <div>
+                                            Du {{ item.start_date|date:"d/m/Y" }}<br>
+                                            au {{ item.end_date|date:"d/m/Y" }}<br>
+                                            <span class="small">({{ item.get_duration }} jours)</span>
+                                        </div>
+                                    </td>
+                                    <td class="product-subtotal">
+                                        <span class="amount">{{ item.get_cost }} €</span>
+                                    </td>
+                                    <td class="product-remove">
+                                        <a href="{% url 'reservations:remove' item.id %}"><i class="fa fa-times"></i></a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="coupon-all">
+                                <div class="coupon">
+                                    <input id="coupon_code" class="input-text" name="coupon_code" value="" placeholder="Code de réduction" type="text">
+                                    <button class="c-btn theme-btn-2" name="apply_coupon" type="submit">Appliquer le code</button>
+                                </div>
+                                <div class="coupon2">
+                                    <input class="c-btn theme-btn" name="update_cart" value="Mettre à jour le panier" type="submit">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-5 ml-auto">
+                            <div class="cart-page-total">
+                                <h2>Total du panier</h2>
+                                <ul class="mb-20">
+                                    <li>Sous-total <span>{{ cart.get_total_price }} €</span></li>
+                                    <li>Total <span>{{ cart.get_total_price }} €</span></li>
+                                </ul>
+                                <a class="c-btn theme-btn" href="{% url 'reservations:checkout' %}">Procéder au paiement</a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                {% else %}
+                <div class="text-center py-5">
+                    <h3>Votre panier est vide</h3>
+                    <p>Vous n'avez pas encore ajouté d'outils à votre panier.</p>
+                    <a href="{% url 'tools:list' %}" class="c-btn mt-3">Explorer les outils disponibles</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Cart Area End -->
+{% endblock %}

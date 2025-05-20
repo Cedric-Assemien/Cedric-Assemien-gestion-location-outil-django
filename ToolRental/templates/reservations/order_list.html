@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes locations - ToolRental{% endblock %}
+
+{% block content %}
+<!-- breadcrumb-area-start -->
+<div class="breadcrumb-area pt-125 pb-125" style="background-image:url({% static 'img/bg/tools-bg.jpg' %})">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="breadcrumb-wrapper">
+                    <div class="breadcrumb-text">
+                        <h2>Mes locations</h2>
+                    </div>
+                    <ul class="breadcrumb-menu">
+                        <li><a href="{% url 'tools:home' %}">Accueil</a></li>
+                        <li><span>Mes locations</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- breadcrumb-area-end -->
+
+<!-- Orders Area Start -->
+<div class="cart-area pt-100 pb-100">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                {% if orders %}
+                <div class="table-content table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Commande #</th>
+                                <th>Date</th>
+                                <th>Outils</th>
+                                <th>Total</th>
+                                <th>Statut</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr>
+                                <td>{{ order.id }}</td>
+                                <td>{{ order.created_at|date:"d/m/Y" }}</td>
+                                <td>
+                                    {% for item in order.items.all %}
+                                        {{ item.tool.name }}{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td>{{ order.total_price }} €</td>
+                                <td>
+                                    {% if order.status == 'pending' %}
+                                    <span class="badge badge-warning">En attente</span>
+                                    {% elif order.status == 'approved' %}
+                                    <span class="badge badge-success">Approuvée</span>
+                                    {% elif order.status == 'rejected' %}
+                                    <span class="badge badge-danger">Rejetée</span>
+                                    {% elif order.status == 'in_progress' %}
+                                    <span class="badge badge-primary">En cours</span>
+                                    {% elif order.status == 'completed' %}
+                                    <span class="badge badge-secondary">Terminée</span>
+                                    {% elif order.status == 'cancelled' %}
+                                    <span class="badge badge-dark">Annulée</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'reservations:order_detail' order.id %}" class="btn btn-sm btn-info">Détails</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <h3>Vous n'avez pas encore effectué de location</h3>
+                    <p>Consultez notre catalogue d'outils pour trouver ce dont vous avez besoin.</p>
+                    <a href="{% url 'tools:list' %}" class="c-btn mt-3">Explorer les outils disponibles</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Orders Area End -->
+{% endblock %}

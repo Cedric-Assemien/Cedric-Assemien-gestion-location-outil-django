@@ -20,6 +20,10 @@ def register(request):
             
             messages.success(request, f'Votre compte a été créé avec succès ! Vous pouvez maintenant vous connecter.')
             return redirect('accounts:login')
+        else:
+            # Ajouter ce bloc pour afficher les erreurs
+            print(form.errors)  # Affichera les erreurs dans la console du serveur
+            messages.error(request, f'Erreur lors de l\'inscription: {form.errors}')
     else:
         form = UserRegisterForm()
     
@@ -28,7 +32,6 @@ def register(request):
     }
     
     return render(request, 'accounts/register.html', context)
-
 @login_required
 def profile(request):
     if request.method == 'POST':

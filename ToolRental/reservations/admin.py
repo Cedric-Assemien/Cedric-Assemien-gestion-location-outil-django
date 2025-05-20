@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Reservation, Payment
+from .models import Cart, CartItem, Reservation, Payment
 
 class PaymentInline(admin.StackedInline):
     model = Payment
@@ -88,3 +88,12 @@ class PaymentAdmin(admin.ModelAdmin):
         return f"{tool} - {renter} (#{obj.reservation.id})"
     
     reservation_info.short_description = "Réservation"
+
+class CartItemInline(admin.TabularInline):
+    model = CartItem
+    extra = 0
+
+@admin.register(Cart)
+class CartAdmin(admin.ModelAdmin):
+    list_display = ['user', 'created_at', 'updated_at']
+    inlines = [CartItemInline]

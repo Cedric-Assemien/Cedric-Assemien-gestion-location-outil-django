@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Détails de la location #{{ order.id }} - ToolRental{% endblock %}
+
+{% block content %}
+<!-- breadcrumb-area-start -->
+<div class="breadcrumb-area pt-125 pb-125" style="background-image:url({% static 'img/bg/tools-bg.jpg' %})">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="breadcrumb-wrapper">
+                    <div class="breadcrumb-text">
+                        <h2>Détails de la location #{{ order.id }}</h2>
+                    </div>
+                    <ul class="breadcrumb-menu">
+                        <li><a href="{% url 'tools:home' %}">Accueil</a></li>
+                        <li><a href="{% url 'reservations:orders' %}">Mes locations</a></li>
+                        <li><span>Location #{{ order.id }}</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- breadcrumb-area-end -->
+
+<!-- Order Detail Area Start -->
+<div class="container py-5">
+    <div class="row">
+        <!-- Order Status -->
+        <div class="col-md-12 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h4 class="mb-0">État de la location</h4>
+                        <div>
+                            {% if order.status == 'pending' %}
+                            <span class="badge badge-warning p-2">En attente</span>
+                            {% elif order.status == 'approved' %}
+                            <span class="badge badge-success p-2">Approuvée</span>
+                            {% elif order.status == 'rejected' %}
+                            <span class="badge badge-danger p-2">Rejetée</span>
+                            {% elif order.status == 'in_progress' %}
+                            <span class="badge badge-primary p-2">En cours</span>
+                            {% elif order.status == 'completed' %}
+                            <span class="badge badge-secondary p-2">Terminée</span>
+                            {% elif order.status == 'cancelled' %}
+                            <span class="badge badge-dark p-2">Annulée</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Items -->
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Outils loués</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Outil</th>
+                                    <th>Période</th>
+                                    <th>Prix/jour</th>
+                                    <th>Qté</th>
+                                    <th class="text-right">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.items.all %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'tools:detail' item.tool.id %}">{{ item.tool.name }}</a>
+                                    </td>
+                                    <td>
+                                        {{ item.start_date|date:"d/m/Y" }} au {{ item.end_date|date:"d/m/Y" }}
+                                        <br>
+                                        <small>({{ item.get_duration }} jours)</small>
+                                    </td>
+                                    <td>{{ item.price }} €</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td class="text-right">{{ item.get_cost }} €</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4" class="text-right"><strong>Total :</strong></td>
+                                    <td class="text-right"><strong>{{ order.total_price }} €</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Notes -->
+            {% if order.note %}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Notes sur la location</h5>
+                </div>
+                <div class="card-body">
+                    {{ order.note }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Order Info -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Informations de location</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Date de commande :</strong> {{ order.created_at|date:"d/m/Y H:i" }}</p>
+                    <p><strong>Dernière mise à jour :</strong> {{ order.updated_at|date:"d/m/Y H:i" }}</p>
+                    {% if order.status == 'pending' %}
+                    <div class="alert alert-info">
+                        <i class="far fa-info-circle"></i> Votre demande de location est en cours de traitement. Le propriétaire va confirmer votre demande prochainement.
+                    </div>
+                    {% elif order.status == 'approved' %}
+                    <div class="alert alert-success">
+                        <i class="far fa-check-circle"></i> Votre demande a été approuvée ! Contactez le propriétaire pour convenir de la remise des outils.
+                    </div>
+                    {% elif order.status == 'rejected' %}
+                    <div class="alert alert-danger">
+                        <i class="far fa-times-circle"></i> Votre demande a malheureusement été rejetée. Consultez d'autres outils disponibles ou contactez-nous pour plus d'informations.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Coordonnées</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>{{ order.first_name }} {{ order.last_name }}</strong></p>
+                    <p>{{ order.email }}</p>
+                    <p>{{ order.address }}</p>
+                    <p>{{ order.postal_code }}, {{ order.city }}</p>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                {% if order.status == 'pending' %}
+                <a href="#" class="c-btn btn-2 mb-2 w-100">Annuler la demande</a>
+                {% endif %}
+                <a href="{% url 'reservations:orders' %}" class="c-btn mb-2 w-100">Retour à mes locations</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Order Detail Area End -->
+{% endblock %}

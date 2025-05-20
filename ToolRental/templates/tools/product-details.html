@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ tool.name }} - ToolRental{% endblock %}
+
+{% block content %}
+<!-- breadcrumb-area-start -->
+<div class="breadcrumb-area pt-125 pb-125" style="background-image: url({% static 'img/bg/04.jpg' %})">
+  <div class="container">
+    <div class="row">
+      <div class="col-xl-12">
+        <div class="breadcrumb-wrapper">
+          <div class="breadcrumb-text">
+            <h2>Détails de l'outil</h2>
+          </div>
+          <ul class="breadcrumb-menu">
+            <li><a href="{% url 'tools:home' %}">Accueil</a></li>
+            <li><span>{{ tool.name }}</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- breadcrumb-area-end -->
+
+<!-- shop-details-area start -->
+<section class="shop-details-area pt-100 pb-100">
+  <div class="container">
+    <div class="row">
+      <div class="col-xl-6 col-lg-6">
+        <div class="product-details-img mb-10">
+          <div class="tab-content" id="myTabContent">
+            {% if tool.images.all %}
+              {% for image in tool.images.all %}
+                <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="home{{ forloop.counter }}" role="tabpanel">
+                  <div class="product-large-img">
+                    <img src="{{ image.image.url }}" alt="{{ tool.name }}" />
+                  </div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="tab-pane fade show active" id="home1" role="tabpanel">
+                <div class="product-large-img">
+                  <img src="{% static 'img/tools/default-tool.jpg' %}" alt="{{ tool.name }}" />
+                </div>
+              </div>
+            {% endif %}
+          </div>
+          <div class="shop-thumb-tab mb-30">
+            <ul class="nav" id="myTab" role="tablist">
+              {% if tool.images.all %}
+                {% for image in tool.images.all %}
+                  <li class="nav-item">
+                    <a class="nav-link {% if forloop.first %}active{% endif %}" id="home-tab{{ forloop.counter }}" data-toggle="tab" href="#home{{ forloop.counter }}" role="tab" aria-selected="true">
+                      <img src="{{ image.image.url }}" alt="{{ tool.name }}" />
+                    </a>
+                  </li>
+                {% endfor %}
+              {% else %}
+                <li class="nav-item">
+                  <a class="nav-link active" id="home-tab1" data-toggle="tab" href="#home1" role="tab" aria-selected="true">
+                    <img src="{% static 'img/tools/default-tool.jpg' %}" alt="{{ tool.name }}" />
+                  </a>
+                </li>
+              {% endif %}
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-xl-6 col-lg-6">
+        <div class="product-details mb-30">
+          <div class="product-details-title">
+            <h1>{{ tool.name }}</h1>
+            <div class="price details-price pb-30 mb-20">
+              <span>{{ tool.price_per_day }} €/jour</span>
+              {% if tool.old_price_per_day %}
+                <span class="old-price">{{ tool.old_price_per_day }} €/jour</span>
+              {% endif %}
+            </div>
+          </div>
+          <p>{{ tool.description }}</p>
+
+          <div class="product-cat mt-30 mb-30">
+            <span>Catégorie : </span>
+            <a href="{% url 'tools:category_detail' tool.category.id %}">{{ tool.category.name }}</a>
+          </div>
+
+          <div class="product-social mb-30">
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-behance"></i></a>
+            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#"><i class="fab fa-youtube"></i></a>
+          </div>
+
+          <div class="reservation-form mb-30">
+            <form action="{% url 'reservations:create' tool.id %}" method="post">
+              {% csrf_token %}
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label>Date de début</label>
+                  <input type="date" name="start_date" class="form-control" required />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label>Date de fin</label>
+                  <input type="date" name="end_date" class="form-control" required />
+                </div>
+                <div class="col-md-12 mb-3">
+                  <label>Quantité</label>
+                  <input type="number" name="quantity" value="1" min="1" class="form-control" required />
+                </div>
+                <div class="col-md-12">
+                  <button type="submit" class="c-btn theme-btn">
+                    Réserver maintenant
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row mt-50">
+      <div class="col-xl-12">
+        <div class="product-review">
+          <ul class="nav review-tab" id="myTabproduct" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="home-tab6" data-toggle="tab" href="#home6" role="tab" aria-controls="home6" aria-selected="true">Description</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="profile-tab6" data-toggle="tab" href="#profile6" role="tab" aria-controls="profile6" aria-selected="false">Caractéristiques</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="contact-tab6" data-toggle="tab" href="#contact6" role="tab" aria-controls="contact6" aria-selected="false">Avis (0)</a>
+            </li>
+          </ul>
+          <div class="tab-content" id="myTabContent6">
+            <div class="tab-pane fade show active" id="home6" role="tabpanel" aria-labelledby="home-tab6">
+              <div class="product-description">
+                {{ tool.description|linebreaks }}
+              </div>
+            </div>
+            <div class="tab-pane fade" id="profile6" role="tabpanel" aria-labelledby="profile-tab6">
+              <div class="product-features">
+                <ul>
+                  {% if tool.specifications %}
+                    {% for spec in tool.specifications %}
+                      <li>{{ spec.name }}: {{ spec.value }}</li>
+                    {% endfor %}
+                  {% else %}
+                    <li>Marque: {{ tool.brand|default:"Non spécifiée" }}</li>
+                    <li>État: {{ tool.get_condition_display|default:"Non spécifié" }}</li>
+                    <li>Disponibilité: {% if tool.is_available %}En stock{% else %}Indisponible{% endif %}</li>
+                  {% endif %}
+                </ul>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="contact6" role="tabpanel" aria-labelledby="contact-tab6">
+              <div class="product-reviews">
+                <div class="review-box">
+                  <h4>Aucun avis pour le moment</h4>
+                  <p>Soyez le premier à laisser un avis sur "{{ tool.name }}"</p>
+                  <a href="#" class="c-btn">Laisser un avis</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- shop-details-area end -->
+
+<!-- related products area start -->
+<section class="related-product pt-100 pb-95 grey-bg">
+  <div class="container">
+    <div class="row">
+      <div class="col-xl-12">
+        <div class="section-title text-center mb-50">
+          <h2>Outils similaires</h2>
+          <p>D'autres outils qui pourraient vous intéresser</p>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      {% for related_tool in related_tools %}
+      <div class="col-xl-3 col-lg-3 col-md-6">
+        <div class="product-wrapper text-center mb-30">
+          <div class="product-img position-relative">
+            <a href="{% url 'tools:detail' related_tool.id %}">
+              {% if related_tool.images.filter.exists %}
+                <img src="{{ related_tool.images.first.image.url }}" alt="{{ related_tool.name }}" />
+              {% else %}
+                <img src="{% static 'img/tools/default-tool.jpg' %}" alt="{{ related_tool.name }}" />
+              {% endif %}
+            </a>
+            <div class="product-action">
+              <a class="c-btn" href="{% url 'reservations:create' related_tool.id %}">réserver <i class="far fa-plus"></i></a>
+              <a class="action-btn" href="{% url 'tools:detail' related_tool.id %}"><i class="far fa-search"></i></a>
+            </div>
+          </div>
+          <div class="product-text">
+            <h4><a href="{% url 'tools:detail' related_tool.id %}">{{ related_tool.name }}</a></h4>
+            <span>{{ related_tool.price_per_day }} €/jour</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+<!-- related products area end -->
+{% endblock %}

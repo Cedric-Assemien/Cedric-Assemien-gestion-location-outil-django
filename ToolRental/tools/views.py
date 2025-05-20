@@ -94,7 +94,17 @@ def tool_detail(request, tool_id):
     }
     
     return render(request, 'tools/tool_detail.html', context)
-
+# tools/views.py
+def detail(request, tool_id):
+    tool = get_object_or_404(Tool, id=tool_id)
+    
+    # Récupérer des outils similaires (même catégorie, mais pas le même outil)
+    related_tools = Tool.objects.filter(category=tool.category).exclude(id=tool.id)[:4]
+    
+    return render(request, 'tools/product-details.html', {
+        'tool': tool,
+        'related_tools': related_tools
+    })
 @login_required
 def add_tool(request):
     # Vérifier si l'utilisateur est propriétaire
