@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ToolRental - Inscription{% endblock %}
+
+{% block content %}
+<!-- breadcrumb-area-start -->
+<div class="breadcrumb-area pt-125 pb-125" style="background-image:url({% static 'img/bg/tools-bg.jpg' %})">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="breadcrumb-wrapper">
+                    <div class="breadcrumb-text">
+                        <h2>Inscription</h2>
+                    </div>
+                    <ul class="breadcrumb-menu">
+                        <li><a href="{% url 'tools:home' %}">Accueil</a></li>
+                        <li><span>Inscription</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- breadcrumb-area-end -->
+
+<!-- register Area Start-->
+<section class="login-area pt-100 pb-100">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-10 offset-lg-1">
+                <div class="basic-login">
+                    <h3 class="text-center mb-60">Créer un compte</h3>
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="id_username">Nom d'utilisateur <span>*</span></label>
+                                {{ form.username }}
+                                {% if form.username.errors %}
+                                    <div class="text-danger">
+                                        {{ form.username.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_email">Email <span>*</span></label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="text-danger">
+                                        {{ form.email.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label for="id_first_name">Prénom <span>*</span></label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                    <div class="text-danger">
+                                        {{ form.first_name.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_last_name">Nom <span>*</span></label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                    <div class="text-danger">
+                                        {{ form.last_name.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label for="id_password1">Mot de passe <span>*</span></label>
+                                {{ form.password1 }}
+                                {% if form.password1.errors %}
+                                    <div class="text-danger">
+                                        {{ form.password1.errors }}
+                                    </div>
+                                {% endif %}
+                                <div class="small text-muted mt-1">
+                                    {{ form.password1.help_text }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_password2">Confirmation du mot de passe <span>*</span></label>
+                                {{ form.password2 }}
+                                {% if form.password2.errors %}
+                                    <div class="text-danger">
+                                        {{ form.password2.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <label for="id_user_type">Type d'utilisateur <span>*</span></label>
+                                {{ form.user_type }}
+                                {% if form.user_type.errors %}
+                                    <div class="text-danger">
+                                        {{ form.user_type.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="login-action mb-20 mt-4 fix">
+                            <span class="log-rem f-left">
+                                <input id="terms" type="checkbox" name="terms" required />
+                                <label for="terms">J'accepte les <a href="{% url 'tools:terms' %}">conditions d'utilisation</a> et la <a href="{% url 'tools:privacy' %}">politique de confidentialité</a></label>
+                            </span>
+                        </div>
+                        
+                        <button type="submit" class="c-btn theme-btn-2 w-100 mt-3">Créer mon compte</button>
+                        <div class="or-divide"><span>ou</span></div>
+                        <a href="{% url 'accounts:login' %}" class="c-btn theme-btn w-100">Se connecter</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- register Area End-->
+{% endblock %}

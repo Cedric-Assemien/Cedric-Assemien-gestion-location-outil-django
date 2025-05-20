@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Réserver {{ tool.name }} - ToolRental{% endblock %}
+
+{% block content %}
+<!-- breadcrumb-area-start -->
+<div class="breadcrumb-area pt-125 pb-125" style="background-image:url({% static 'img/bg/tools-bg.jpg' %})">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="breadcrumb-wrapper">
+                    <div class="breadcrumb-text">
+                        <h2>Réserver un outil</h2>
+                    </div>
+                    <ul class="breadcrumb-menu">
+                        <li><a href="{% url 'tools:home' %}">Accueil</a></li>
+                        <li><a href="{% url 'tools:detail' tool.id %}">{{ tool.name }}</a></li>
+                        <li><span>Réservation</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- breadcrumb-area-end -->
+
+<!-- reservation-area-start -->
+<section class="checkout-area pt-100 pb-100">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-6 col-lg-6">
+                <div class="checkout-form-wrap">
+                    <h3 class="mb-30">Détails de la réservation</h3>
+                    <form action="{% url 'reservations:create' tool.id %}" method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="checkout-form-box">
+                                    <label for="id_start_date">Date de début <span>*</span></label>
+                                    {{ form.start_date }}
+                                    {% if form.start_date.errors %}
+                                        <div class="text-danger">
+                                            {{ form.start_date.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="checkout-form-box">
+                                    <label for="id_end_date">Date de fin <span>*</span></label>
+                                    {{ form.end_date }}
+                                    {% if form.end_date.errors %}
+                                        <div class="text-danger">
+                                            {{ form.end_date.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="checkout-form-box">
+                            <label for="id_message">Message pour le propriétaire (facultatif)</label>
+                            {{ form.message }}
+                        </div>
+                        
+                        <div class="checkout-form-box mt-30">
+                            <div class="checkout-form-box">
+                                <h5 class="mb-20">Informations de contact</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label for="id_phone">Numéro de téléphone <span>*</span></label>
+                                        <input type="tel" id="id_phone" name="phone" value="{{ user.profile.phone|default:'' }}" required>
+                                        {% if form.phone.errors %}
+                                            <div class="text-danger">
+                                                {{ form.phone.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="id_address">Adresse <span>*</span></label>
+                                        <input type="text" id="id_address" name="address" value="{{ user.profile.address|default:'' }}" required>
+                                        {% if form.address.errors %}
+                                            <div class="text-danger">
+                                                {{ form.address.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="checkout-form-box mt-20">
+                            <div class="checkout-form-box">
+                                <h5 class="mb-20">Conditions de location</h5>
+                                <div class="checkout-form-list">
+                                    <label><input type="checkbox" required> J'accepte les <a href="{% url 'tools:terms' %}">conditions de location</a> <span>*</span></label>
+                                </div>
+                                <div class="checkout-form-list">
+                                    <label><input type="checkbox" required> Je comprends que je dois verser une caution de {{ tool.deposit_amount }} € <span>*</span></label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-30">
+                            <button type="submit" class="c-btn theme-btn">Procéder au paiement <i class="far fa-credit-card"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="col-xl-6 col-lg-6">
+                <div class="your-order mb-30">
+                    <h3>Votre réservation</h3>
+                    <div class="your-order-table table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="product-name">Outil</th>
+                                    <th class="product-total">Prix</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="cart_item">
+                                    <td class="product-name">
+                                        {{ tool.name }} <strong class="product-quantity">× {{ days }} jour(s)</strong>
+                                    </td>
+                                    <td class="product-total">
+                                        <span class="amount">{{ tool.price_per_day }} €/jour</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr class="order-total">
+                                    <th>Total</th>
+                                    <td><span class="amount">{{ total_price }} €</span></td>
+                                </tr>
+                                <tr>
+                                    <th>Caution (remboursable)</th>
+                                    <td><span class="amount">{{ tool.deposit_amount }} €</span></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div class="order-details mt-40">
+                        <h3>Détails de l'outil</h3>
+                        <div class="order-details-img">
+                            {% if tool.images.exists %}
+                                <img src="{{ tool.images.first.image.url }}" alt="{{ tool.name }}">
+                            {% else %}
+                                <img src="{% static 'img/tools/default-tool.jpg' %}" alt="{{ tool.name }}">
+                            {% endif %}
+                        </div>
+                        <div class="order-details-info mt-20">
+                            <h4>{{ tool.name }}</h4>
+                            <p>{{ tool.description|truncatewords:30 }}</p>
+                            <ul class="mt-20">
+                                <li><strong>Catégorie :</strong> {{ tool.category.name }}</li>
+                                <li><strong>État :</strong> {{ tool.get_condition_display }}</li>
+                                <li><strong>Localisation :</strong> {{ tool.location }}</li>
+                                <li><strong>Propriétaire :</strong> {{ tool.owner.get_full_name }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- reservation-area-end -->
+{% endblock %}

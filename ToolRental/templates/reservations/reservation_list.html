@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes Réservations - ToolRental{% endblock %}
+
+{% block content %}
+<!-- breadcrumb-area-start -->
+<div class="breadcrumb-area pt-125 pb-125" style="background-image:url({% static 'img/bg/tools-bg.jpg' %})">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="breadcrumb-wrapper">
+                    <div class="breadcrumb-text">
+                        <h2>Mes Réservations</h2>
+                    </div>
+                    <ul class="breadcrumb-menu">
+                        <li><a href="{% url 'tools:home' %}">Accueil</a></li>
+                        <li><a href="{% url 'accounts:profile' %}">Mon Compte</a></li>
+                        <li><span>Mes Réservations</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- breadcrumb-area-end -->
+
+<!-- reservation-list-area-start -->
+<section class="cart-area pt-100 pb-100">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="cart-wrapper">
+                    <div class="cart-title">
+                        <h3>Mes réservations en cours</h3>
+                    </div>
+                    <div class="cart-table table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Image</th>
+                                    <th scope="col">Outil</th>
+                                    <th scope="col">Période</th>
+                                    <th scope="col">Prix Total</th>
+                                    <th scope="col">Statut</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reservation in active_reservations %}
+                                <tr>
+                                    <td>
+                                        <div class="cart-img">
+                                            {% if reservation.tool.images.exists %}
+                                                <img src="{{ reservation.tool.images.first.image.url }}" alt="{{ reservation.tool.name }}">
+                                            {% else %}
+                                                <img src="{% static 'img/tools/default-tool.jpg' %}" alt="{{ reservation.tool.name }}">
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="cart-product-name">
+                                            <a href="{% url 'tools:detail' reservation.tool.id %}">{{ reservation.tool.name }}</a>
+                                            <p>Propriétaire: {{ reservation.tool.owner.get_full_name }}</p>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="cart-quantity">
+                                            <p>Du {{ reservation.start_date|date:"d/m/Y" }}</p>
+                                            <p>Au {{ reservation.end_date|date:"d/m/Y" }}</p>
+                                            <p class="text-muted">({{ reservation.get_days }} jours)</p>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="cart-price">
+                                            <span>{{ reservation.total_price }} €</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="cart-status">
+                                            {% if reservation.status == 'pending' %}
+                                                <span class="badge badge-warning">En attente</span>
+                                            {% elif reservation.status == 'confirmed' %}
+                                                <span class="badge badge-success">Confirmée</span>
+                                            {% elif reservation.status == 'canceled' %}
+                                                <span class="badge badge-danger">Annulée</span>
+                                            {% elif reservation.status == 'completed' %}
+                                                <span class="badge badge-primary">Terminée</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="cart-action">
+                                            <a href="{% url 'reservations:detail' reservation.id %}" class="btn btn-sm btn-info">Détails</a>
+                                            {% if reservation.status == 'pending' or reservation.status == 'confirmed' %}
+                                                <a href="{% url 'reservations:cancel' reservation.id %}" class="btn btn-sm btn-danger mt-2" onclick="return confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')">Annuler</a>
+                                            {% endif %}
+                                            {% if reservation.status == 'completed' and not reservation.review %}
+                                                <a href="{% url 'reviews:add' reservation.tool.id %}?reservation={{ reservation.id }}" class="btn btn-sm btn-primary mt-2">Évaluer</a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-5">
+                                        <p>Vous n'avez aucune réservation en cours.</p>
+                                        <a href="{% url 'tools:list' %}" class="c-btn theme-btn mt-3">Louer un outil</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                {% if past_reservations %}
+                <div class="cart-wrapper mt-50">
+                    <div class="cart-title">
+                        <h3>Historique de mes réservations</h3>
+                    </div>
+                    <div class="cart-table table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Image</th>
+                                    <th scope="col">Outil</th>
+                                    <th scope="col">Période</th>
+                                    <th scope="col">Prix Total</th>
+                                    <th scope="col">Statut</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reservation in past_reservations %}
+                                <tr>
+                                    <td>
+                                        <div class="cart-img">
+                                            {% if reservation.tool.images.exists %}
+                                                <img src="{{ reservation.tool.images.first.image.url }}" alt="{{ reservation.tool.name }}">
+                                            {% else %}
+                                                <img src="{% static 'img/tools/default-tool.jpg' %}" alt="{{ reservation.tool.name }}">
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="cart-product-name">
+                                            <a href="{% url 'tools:detail' reservation.tool.id %}">{{ reservation.tool.name }}</a>
+                                            <p>Propriétaire: {{ reservation.tool.owner.get_full_name }}</p>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="cart-quantity">
+                                            <p>Du {{ reservation.start_date|date:"d/m/Y" }}</p>
+                                            <p>Au {{ reservation.end_date|date:"d/m/Y" }}</p>
+                                            <p class="text-muted">({{ reservation.get_days }} jours)</p>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="cart-price">
+                                            <span>{{ reservation.total_price }} €</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="cart-status">
+                                            {% if reservation.status == 'pending' %}
+                                                <span class="badge badge-warning">En attente</span>
+                                            {% elif reservation.status == 'confirmed' %}
+                                                <span class="badge badge-success">Confirmée</span>
+                                            {% elif reservation.status == 'canceled' %}
+                                                <span class="badge badge-danger">Annulée</span>
+                                            {% elif reservation.status == 'completed' %}
+                                                <span class="badge badge-primary">Terminée</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="cart-action">
+                                            <a href="{% url 'reservations:detail' reservation.id %}" class="btn btn-sm btn-info">Détails</a>
+                                            {% if reservation.status == 'completed' and not reservation.review %}
+                                                <a href="{% url 'reviews:add' reservation.tool.id %}?reservation={{ reservation.id }}" class="btn btn-sm btn-primary mt-2">Évaluer</a>
+                                            {% endif %}
+                                            {% if reservation.status == 'completed' %}
+                                                <a href="{% url 'tools:detail' reservation.tool.id %}" class="btn btn-sm btn-success mt-2">Relouer</a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+<!-- reservation-list-area-end -->
+{% endblock %}

@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ tool.name }} - ToolRental{% endblock %}
+
+{% block content %}
+<!-- breadcrumb-area-start -->
+<div class="breadcrumb-area pt-125 pb-125" style="background-image:url({% static 'img/bg/tools-bg.jpg' %})">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="breadcrumb-wrapper">
+                    <div class="breadcrumb-text">
+                        <h2>Détail de l'outil</h2>
+                    </div>
+                    <ul class="breadcrumb-menu">
+                        <li><a href="{% url 'tools:home' %}">Accueil</a></li>
+                        <li><a href="{% url 'tools:list' %}">Outils</a></li>
+                        <li><span>{{ tool.name }}</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- breadcrumb-area-end -->
+
+<!-- shop-details-area start -->
+<section class="shop-details-area pt-100 pb-100">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-6 col-lg-5">
+                <div class="product-details-img mb-30">
+                    <div class="tab-content" id="myTabContent">
+                        {% for image in tool.images.all %}
+                        <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="tab-{{ forloop.counter }}" role="tabpanel">
+                            <div class="product-large-img">
+                                <img src="{{ image.image.url }}" alt="{{ tool.name }}">
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="tab-pane fade show active" id="tab-1" role="tabpanel">
+                            <div class="product-large-img">
+                                <img src="{% static 'img/tools/default-tool.jpg' %}" alt="{{ tool.name }}">
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="shop-thumb-tab mb-30">
+                        <ul class="nav" id="myTab" role="tablist">
+                            {% for image in tool.images.all %}
+                            <li class="nav-item">
+                                <a class="nav-link {% if forloop.first %}active{% endif %}" id="tab-{{ forloop.counter }}-tab" data-toggle="tab" href="#tab-{{ forloop.counter }}" role="tab" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+                                    <img src="{{ image.image.url }}" alt="{{ tool.name }}">
+                                </a>
+                            </li>
+                            {% empty %}
+                            <li class="nav-item">
+                                <a class="nav-link active" id="tab-1-tab" data-toggle="tab" href="#tab-1" role="tab" aria-selected="true">
+                                    <img src="{% static 'img/tools/default-tool.jpg' %}" alt="{{ tool.name }}">
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6 col-lg-7">
+                <div class="product-details mb-30">
+                    <div class="product-details-title">
+                        <h1>{{ tool.name }}</h1>
+                        <div class="details-price mb-20">
+                            <span>{{ tool.price_per_day }} €/jour</span>
+                            <span class="old-price">Caution : {{ tool.deposit_amount }} €</span>
+                        </div>
+
+                        {% if tool.reviews.exists %}
+                        <div class="rating mb-20">
+                            {% with avg_rating=tool.reviews.average_rating %}
+                            {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= avg_rating|floatformat:0|add:"0" %}
+                                    <a href="#"><i class="fas fa-star"></i></a>
+                                {% else %}
+                                    <a href="#"><i class="far fa-star"></i></a>
+                                {% endif %}
+                            {% endfor %}
+                            {% endwith %}
+                            <span>({{ tool.reviews.count }} avis)</span>
+                        </div>
+                        {% endif %}
+
+                        <p>{{ tool.description|linebreaks }}</p>
+                        
+                        <div class="product-cat mt-30 mb-30">
+                            <span>Catégorie: </span>
+                            <a href="{% url 'tools:category_detail' tool.category.id %}">{{ tool.category.name }}</a>
+                        </div>
+                        <div class="product-cat mt-10 mb-30">
+                            <span>État: </span>
+                            <a href="#">{{ tool.get_condition_display }}</a>
+                        </div>
+                        <div class="product-cat mt-10 mb-30">
+                            <span>Localisation: </span>
+                            <a href="#">{{ tool.location }}</a>
+                        </div>
+                        <div class="product-cat mt-10 mb-30">
+                            <span>Propriétaire: </span>
+                            <a href="{% url 'accounts:owner_profile' tool.owner.id %}">{{ tool.owner.get_full_name }}</a>
+                        </div>
+                        <div class="product-cat mt-10 mb-30">
+                            <span>Disponibilité: </span>
+                            {% if tool.is_available %}
+                                <span class="badge badge-success">Disponible</span>
+                            {% else %}
+                                <span class="badge badge-danger">Non disponible</span>
+                            {% endif %}
+                        </div>
+
+                        {% if tool.is_available %}
+                        <div class="product-action-details mb-30">
+                            <div class="product-details-action">
+                                <form action="{% url 'reservations:create' tool.id %}" method="get">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="start_date">Date de début</label>
+                                                <input type="date" id="start_date" name="start_date" class="form-control" required min="{{ today|date:'Y-m-d' }}">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="end_date">Date de fin</label>
+                                                <input type="date" id="end_date" name="end_date" class="form-control" required min="{{ today|date:'Y-m-d' }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="details-cart mt-30">
+                                        <button type="submit" class="c-btn theme-btn">Réserver maintenant <i class="far fa-plus"></i></button>
+                                        <a href="{% url 'tools:add_to_wishlist' tool.id %}" class="c-btn btn-black ml-3">Ajouter aux favoris <i class="far fa-heart"></i></a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-50">
+            <div class="col-xl-12">
+                <div class="product-review">
+                    <ul class="nav review-tab" id="myTabReview" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="description-tab" data-toggle="tab" href="#description" role="tab" aria-controls="description" aria-selected="true">Description</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="reviews-tab" data-toggle="tab" href="#reviews" role="tab" aria-controls="reviews" aria-selected="false">Avis ({{ tool.reviews.count }})</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="myTabContentReview">
+                        <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
+                            <div class="description-wrap">
+                                <p>{{ tool.description|linebreaks }}</p>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
+                            <div class="reviews-wrap">
+                                {% if tool.reviews.exists %}
+                                    {% for review in tool.reviews.all %}
+                                    <div class="review-item mb-30">
+                                        <div class="review-thumb">
+                                            {% if review.reviewer.profile.profile_picture %}
+                                                <img src="{{ review.reviewer.profile.profile_picture.url }}" alt="{{ review.reviewer.get_full_name }}">
+                                            {% else %}
+                                                <img src="{% static 'img/testimonial/default-user.png' %}" alt="{{ review.reviewer.get_full_name }}">
+                                            {% endif %}
+                                        </div>
+                                        <div class="review-content">
+                                            <div class="review-rating mb-10">
+                                                {% for i in "12345"|make_list %}
+                                                    {% if forloop.counter <= review.rating %}
+                                                        <i class="fas fa-star"></i>
+                                                    {% else %}
+                                                        <i class="far fa-star"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                            <h4 class="mb-10">{{ review.reviewer.get_full_name }} <span class="float-right">{{ review.created_at|date:"d M Y" }}</span></h4>
+                                            <p>{{ review.comment }}</p>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p>Aucun avis pour le moment. Soyez le premier à donner votre avis sur cet outil !</p>
+                                {% endif %}
+
+                                {% if user.is_authenticated and user_has_rented %}
+                                    {% if not user_has_reviewed %}
+                                    <div class="review-form">
+                                        <h3>Donnez votre avis</h3>
+                                        <form action="{% url 'reviews:add' tool.id %}" method="post">
+                                            {% csrf_token %}
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <div class="rating-box mb-20">
+                                                        <span>Votre note :</span>
+                                                        <div class="rating">
+                                                            <input type="radio" id="star5" name="rating" value="5" /><label for="star5"></label>
+                                                            <input type="radio" id="star4" name="rating" value="4" /><label for="star4"></label>
+                                                            <input type="radio" id="star3" name="rating" value="3" /><label for="star3"></label>
+                                                            <input type="radio" id="star2" name="rating" value="2" /><label for="star2"></label>
+                                                            <input type="radio" id="star1" name="rating" value="1" /><label for="star1"></label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <label for="comment">Votre commentaire</label>
+                                                    <textarea name="comment" id="comment" cols="30" rows="5" class="form-control"></textarea>
+                                                </div>
+                                                <div class="col-12 mt-20">
+                                                    <button type="submit" class="c-btn theme-btn">Envoyer</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    {% endif %}
+                                {% else %}
+                                    <div class="alert alert-info mt-30">
+                                        {% if user.is_authenticated %}
+                                            <p>Vous devez avoir loué cet outil pour pouvoir laisser un avis.</p>
+                                        {% else %}
+                                            <p><a href="{% url 'accounts:login' %}">Connectez-vous</a> pour pouvoir laisser un avis après avoir loué cet outil.</p>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- shop-details-area end -->
+
+<!-- related-product-area start -->
+<section class="related-product-area pb-100">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="section-title text-center mb-60">
+                    <h2>Outils similaires</h2>
+                    <p>D'autres outils dans la même catégorie qui pourraient vous intéresser</p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            {% for related_tool in related_tools %}
+            <div class="col-xl-3 col-lg-3 col-md-6">
+                <div class="product-wrapper text-center mb-30">
+                    <div class="product-img pos-rel">
+                        <a href="{% url 'tools:detail' related_tool.id %}">
+                            {% if related_tool.images.exists %}
+                                <img src="{{ related_tool.images.first.image.url }}" alt="{{ related_tool.name }}">
+                                {% if related_tool.images.count > 1 %}
+                                    <img class="secondary-img" src="{{ related_tool.images.all.1.image.url }}" alt="{{ related_tool.name }}">
+                                {% endif %}
+                            {% else %}
+                                <img src="{% static 'img/tools/default-tool.jpg' %}" alt="{{ related_tool.name }}">
+                            {% endif %}
+                        </a>
+                        <div class="product-action">
+                            <a class="action-btn" href="{% url 'tools:add_to_wishlist' related_tool.id %}"><i class="far fa-heart"></i></a>
+                            <a class="c-btn" href="{% url 'reservations:create' related_tool.id %}">réserver <i class="far fa-plus"></i></a>
+                            <a class="action-btn" href="{% url 'tools:detail' related_tool.id %}"><i class="far fa-search"></i></a>
+                        </div>
+                    </div>
+                    <div class="product-text">
+                        <h5>{{ related_tool.category.name }}</h5>
+                        <h4><a href="{% url 'tools:detail' related_tool.id %}">{{ related_tool.name }}</a></h4>
+                        <span>{{ related_tool.price_per_day }} €/jour</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+<!-- related-product-area end -->
+{% endblock %}
