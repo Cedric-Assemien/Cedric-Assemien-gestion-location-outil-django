@@ -74,7 +74,6 @@
                                 <div class="col-xl-4 cl-lg-4 col-md-6">
                                     <div class="product-wrapper text-center mb-45">
                                         <div class="product-img pos-rel">
-                                            <a href="{% url 'tools:tool_detail' tool.id %}">
                                             <a href="{% url 'tools:detail' tool.id %}">
                                                 {% if tool.images.all %}
                                                     {% with primary_image=tool.images.filter.first %}
@@ -85,9 +84,6 @@
                                                 {% endif %}
                                             </a>
                                             <div class="product-action">
-                                                <a class="action-btn" href="{% url 'tools:add_to_wishlist' tool.id %}"><i class="far fa-heart"></i></a>
-                                                <a class="c-btn" href="{% url 'rentals:add_to_cart' tool.id %}">Louer <i class="far fa-plus"></i></a>
-                                                <a class="action-btn" href="{% url 'tools:tool_detail' tool.id %}"><i class="far fa-search"></i></a>
                                                 <a class="action-btn" href="#"><i class="far fa-heart"></i></a>
                                                 <a class="c-btn" href="#">Louer <i class="far fa-plus"></i></a>
                                                 <a class="action-btn" href="{% url 'tools:detail' tool.id %}"><i class="far fa-search"></i></a>
@@ -95,7 +91,6 @@
                                         </div>
                                         <div class="product-text">
                                             <h5>{{ category.name }}</h5>
-                                            <h4><a href="{% url 'tools:tool_detail' tool.id %}">{{ tool.name }}</a></h4>
                                             <h4><a href="{% url 'tools:detail' tool.id %}">{{ tool.name }}</a></h4>
                                             <span>{{ tool.price_per_day }} € / jour</span>
                                         </div>
@@ -116,7 +111,6 @@
                                 <div class="col-xl-4 col-lg-4">
                                     <div class="product mb-30">
                                         <div class="product-img">
-                                            <a href="{% url 'tools:tool_detail' tool.id %}">
                                             <a href="{% url 'tools:detail' tool.id %}">
                                                 {% if tool.images.all %}
                                                     {% with primary_image=tool.images.filter.first %}
@@ -133,15 +127,11 @@
                                     <div class="product-list-content mb-30">
                                         <div class="product-text">
                                             <h5>{{ category.name }}</h5>
-                                            <h4><a href="{% url 'tools:tool_detail' tool.id %}">{{ tool.name }}</a></h4>
                                             <h4><a href="{% url 'tools:detail' tool.id %}">{{ tool.name }}</a></h4>
                                             <span>{{ tool.price_per_day }} € / jour</span>
                                         </div>
                                         <p>{{ tool.description|truncatewords:30 }}</p>
                                         <div class="product-action product-02-action">
-                                            <a class="action-btn" href="{% url 'tools:add_to_wishlist' tool.id %}"><i class="far fa-heart"></i></a>
-                                            <a class="c-btn" href="{% url 'rentals:add_to_cart' tool.id %}">Louer <i class="far fa-plus"></i></a>
-                                            <a class="action-btn" href="{% url 'tools:tool_detail' tool.id %}"><i class="far fa-search"></i></a>
                                             <a class="action-btn" href="#"><i class="far fa-heart"></i></a>
                                             <a class="c-btn" href="#">Louer <i class="far fa-plus"></i></a>
                                             <a class="action-btn" href="{% url 'tools:detail' tool.id %}"><i class="far fa-search"></i></a>
@@ -162,7 +152,7 @@
         </div>
         
         {% if category.tools.all %}
-        {% if tools.paginator %}
+            {% if tools.paginator %}
             <div class="row">
                 <div class="col-xl-12">
                     <div class="basic-pagination mt-20 basic-pagination-2 text-center">
@@ -186,6 +176,7 @@
                     </div>
                 </div>
             </div>
+        {% endif %}
         {% endif %}
     </div>
 </div>
