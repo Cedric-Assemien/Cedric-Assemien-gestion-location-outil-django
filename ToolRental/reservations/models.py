@@ -76,3 +76,19 @@ class CartItem(models.Model):
         
     def __str__(self):
         return f"{self.quantity} x {self.tool.name}"
+    
+
+class Order(models.Model):
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    email = models.EmailField()
+    address = models.CharField(max_length=250)
+    postal_code = models.CharField(max_length=20)
+    city = models.CharField(max_length=100)
+    phone = models.CharField(max_length=20)
+    note = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
+
+    def __str__(self):
+        return f"Commande de {self.first_name} {self.last_name}"

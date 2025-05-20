@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from .forms import OrderCreateForm
 from .models import Reservation
-from .models import Cart, CartItem
+from .models import Cart, CartItem, Payment
 import datetime
 @login_required
 def my_reservations(request):
@@ -129,10 +130,71 @@ def cart_remove(request, item_id):
     messages.success(request, "Article supprimé du panier.")
     return redirect('reservations:cart')
 
+
 @login_required
 def checkout(request):
     """Vue pour le processus de paiement"""
-    return render(request, 'reservations/checkout.html')
+    # Récupérer le panier de l'utilisateur actuel
+    cart, created = Cart.objects.get_or_create(user=request.user)
+    
+    # Vérifier si le panier est vide
+    if not cart.items.exists():
+        messages.error(request, "Votre panier est vide. Ajoutez des outils avant de procéder au paiement.")
+        return redirect('tools:tool_list')
+    
+    if request.method == 'POST':
+        form = OrderCreateForm(request.POST)
+        if form.is_valid():
+            order_data = form.cleaned_data
+            
+            # Créer une nouvelle réservation
+            for item in cart.items.all():
+                reservation = Reservation(
+                    tool=item.tool,
+                    renter=request.user,
+                    start_date=item.start_date,
+                    end_date=item.end_date,
+                    total_price=item.get_cost(),
+                    status='confirmed'
+                )
+                reservation.save()
+                
+                # Créer un paiement associé à la réservation
+                payment_method = request.POST.get('payment_method', 'card')
+                payment = Payment(
+                    reservation=reservation,
+                    amount=item.get_cost(),
+                    payment_method=payment_method,
+                    status='completed' if payment_method == 'card' else 'pending'
+                )
+                payment.save()
+            
+            # Vider le panier après la commande
+            cart.items.all().delete()
+            
+            messages.success(request, "Votre location a été confirmée avec succès!")
+            return redirect('reservations:my_reservations')
+    else:
+        # Préremplir le formulaire avec les informations de l'utilisateur
+        initial_data = {
+            'first_name': request.user.first_name,
+            'last_name': request.user.last_name,
+            'email': request.user.email,
+        }
+        # Si l'utilisateur a un profil avec une adresse, ajouter ces informations
+        if hasattr(request.user, 'profile'):
+            initial_data.update({
+                'address': getattr(request.user.profile, 'address', ''),
+                'postal_code': getattr(request.user.profile, 'postal_code', ''),
+                'city': getattr(request.user.profile, 'city', ''),
+                'phone': getattr(request.user.profile, 'phone', ''),
+            })
+        form = OrderCreateForm(initial=initial_data)
+    
+    return render(request, 'reservations/checkout.html', {
+        'cart': cart,
+        'form': form
+    })
 
 @login_required
 def order_list(request):

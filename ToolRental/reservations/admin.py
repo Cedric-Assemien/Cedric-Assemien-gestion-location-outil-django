@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Cart, CartItem, Reservation, Payment
+from .models import Cart, CartItem, Order, Reservation, Payment
 
 class PaymentInline(admin.StackedInline):
     model = Payment
@@ -97,3 +97,38 @@ class CartItemInline(admin.TabularInline):
 class CartAdmin(admin.ModelAdmin):
     list_display = ['user', 'created_at', 'updated_at']
     inlines = [CartItemInline]
+    
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ['id', 'get_full_name', 'email', 'city', 'phone', 'created_at', 'user_info']
+    list_filter = ['created_at', 'city']
+    search_fields = ['first_name', 'last_name', 'email', 'address', 'city', 'phone']
+    date_hierarchy = 'created_at'
+    
+    fieldsets = (
+        ('Informations client', {
+            'fields': ('first_name', 'last_name', 'email', 'phone')
+        }),
+        ('Adresse de livraison', {
+            'fields': ('address', 'postal_code', 'city')
+        }),
+        ('Informations supplémentaires', {
+            'fields': ('note', 'user')
+        }),
+        ('Date', {
+            'fields': ('created_at',)
+        }),
+    )
+    
+    readonly_fields = ['created_at']
+    
+    def get_full_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}"
+    
+    def user_info(self, obj):
+        return f"{obj.user.username} ({obj.user.email})"
+    
+    get_full_name.short_description = "Client"
+    user_info.short_description = "Utilisateur"
+
