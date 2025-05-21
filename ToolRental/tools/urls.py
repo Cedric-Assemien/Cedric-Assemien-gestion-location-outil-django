@@ -6,7 +6,6 @@ app_name = 'tools'
 urlpatterns = [
     path('', views.home, name='home'),
     path('tools/', views.tool_list, name='list'),
-    path('tools/<int:tool_id>/', views.tool_detail, name='detail'),
     path('tools/add/', views.add_tool, name='add'),
     path('my-tools/', views.my_tools, name='my_tools'),
     path('tools/<int:tool_id>/edit/', views.edit_tool, name='edit'),

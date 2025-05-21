@@ -3,7 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Count
 from django.utils import timezone
 from django.contrib import messages
-from .models import Tool, Category, ToolImage
+
+from reviews.models import Review
+from .models import Tool, Category
 from .forms import ToolForm, ToolImageFormSet
 from reservations.models import Reservation
 
@@ -56,15 +58,16 @@ def tool_list(request):
     
     return render(request, 'tools/tool_list.html', context)
 
-def tool_detail(request, tool_id):
+def detail(request, tool_id):
     tool = get_object_or_404(Tool, id=tool_id)
+    
+    # Récupérer tous les avis associés à cet outil - ne pas l'assigner à tool.reviews
+    reviews = Review.objects.filter(tool=tool).select_related('reviewer')
     
     # Vérifier si l'utilisateur a déjà loué cet outil
     user_has_rented = False
     user_has_reviewed = False
-    
     if request.user.is_authenticated:
-       
         user_rentals = Reservation.objects.filter(
             renter=request.user,
             tool=tool,
@@ -72,7 +75,6 @@ def tool_detail(request, tool_id):
         ).exists()
         user_has_rented = user_rentals
         
-        from reviews.models import Review
         user_has_reviewed = Review.objects.filter(
             reviewer=request.user,
             tool=tool
@@ -85,6 +87,8 @@ def tool_detail(request, tool_id):
     ).exclude(id=tool.id)[:4]
     
     context = {
+        'reviews': reviews,    # Utilisez la variable locale, pas tool.reviews
+        'reviews_count': reviews.count(),
         'tool': tool,
         'related_tools': related_tools,
         'user_has_rented': user_has_rented,
@@ -94,18 +98,13 @@ def tool_detail(request, tool_id):
         'footer_categories': Category.objects.all()[:5],
     }
     
-    return render(request, 'tools/tool_detail.html', context)
-# tools/views.py
-def detail(request, tool_id):
-    tool = get_object_or_404(Tool, id=tool_id)
+    # Débogage - vérifier si les avis sont récupérés
+    print(f"Nombre d'avis trouvés : {reviews.count()}")
+    for review in reviews:
+        print(f"Avis par {review.reviewer.username} : {review.rating} étoiles, commentaire : {review.comment}")
     
-    # Récupérer des outils similaires (même catégorie, mais pas le même outil)
-    related_tools = Tool.objects.filter(category=tool.category).exclude(id=tool.id)[:4]
-    
-    return render(request, 'tools/product-details.html', {
-        'tool': tool,
-        'related_tools': related_tools
-    })
+    return render(request, 'tools/product-details.html', context)
+
 @login_required
 def add_tool(request):
     # Vérifier si l'utilisateur est propriétaire

@@ -132,7 +132,7 @@
               <a class="nav-link" id="profile-tab6" data-toggle="tab" href="#profile6" role="tab" aria-controls="profile6" aria-selected="false">Caractéristiques</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" id="contact-tab6" data-toggle="tab" href="#contact6" role="tab" aria-controls="contact6" aria-selected="false">Avis (0)</a>
+              <a class="nav-link" id="contact-tab6" data-toggle="tab" href="#contact6" role="tab" aria-controls="contact6" aria-selected="false">Avis ({{ reviews_count|default:"0" }})</a>
             </li>
           </ul>
           <div class="tab-content" id="myTabContent6">
@@ -156,63 +156,49 @@
                 </ul>
               </div>
             </div>
-         <!-- Remplacez la section des avis actuelle par ce code -->
-
-<div class="container mt-5">
-  <div class="row">
-    <div class="col-12">
-      <h3>Avis ({{ reviews.count }})</h3>
-      <hr>
-      
-      {% if reviews %}
-        {% for review in reviews %}
-          <div class="review-container mb-4">
-            <div class="review-header d-flex align-items-center">
-              <!-- Photo de profil de l'utilisateur -->
-              <div class="reviewer-avatar mr-3">
-                {% if review.reviewer.profile.avatar %}
-                  <img src="{{ review.reviewer.profile.avatar.url }}" alt="{{ review.reviewer.username }}" class="rounded-circle" width="50" height="50">
+            <!-- Onglet des avis correctement structuré -->
+            <div class="tab-pane fade" id="contact6" role="tabpanel" aria-labelledby="contact-tab6">
+              <div class="reviews-section mt-4">
+                <h3>Avis ({{ reviews_count|default:"0" }})</h3>
+                
+                {% if reviews %}
+                    <div class="reviews-container">
+                        {% for review in reviews %}
+                            <div class="review-item card mb-3">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <!-- Nom utilisateur -->
+                                        <div>
+                                            <h5 class="mb-0">{{ review.reviewer.username }}</h5>
+                                            <small class="text-muted">{{ review.created_at|date:"d/m/Y" }}</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Note avec étoiles -->
+                                    <div class="review-rating mb-2">
+                                        {% for i in '12345' %}
+                                            {% if forloop.counter <= review.rating %}
+                                                <i class="fas fa-star text-warning"></i>
+                                            {% else %}
+                                                <i class="far fa-star text-warning"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    
+                                    <!-- Commentaire -->
+                                    <p class="review-comment">{{ review.comment }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
                 {% else %}
-                  <div class="default-avatar rounded-circle bg-secondary text-white d-flex justify-content-center align-items-center" style="width: 50px; height: 50px;">
-                    {{ review.reviewer.username|first|upper }}
-                  </div>
+                    <div class="no-reviews text-center py-4 bg-light rounded">
+                        <p class="lead mb-3">Aucun avis pour le moment</p>
+                        <p class="text-muted">Soyez le premier à laisser un avis sur "{{ tool.name }}"</p>
+                    </div>
                 {% endif %}
               </div>
-              
-              <!-- Nom de l'utilisateur et date -->
-              <div>
-                <h5 class="mb-0">{{ review.reviewer.username }}</h5>
-                <small class="text-muted">{{ review.created_at|date:"d/m/Y" }}</small>
-              </div>
             </div>
-            
-            <!-- Note (étoiles) -->
-            <div class="review-rating my-2">
-              {% for i in '12345' %}
-                {% if forloop.counter <= review.rating %}
-                  <i class="fas fa-star text-warning"></i>
-                {% else %}
-                  <i class="far fa-star text-warning"></i>
-                {% endif %}
-              {% endfor %}
-            </div>
-            
-            <!-- Commentaire -->
-            <div class="review-comment">
-              <p>{{ review.comment }}</p>
-            </div>
-            <hr>
-          </div>
-        {% endfor %}
-      {% else %}
-        <div class="no-reviews text-center py-5">
-          <p class="lead mb-3">Aucun avis pour le moment</p>
-          <p class="text-muted">Soyez le premier à laisser un avis sur "{{ tool.name }}"</p>
-        </div>
-      {% endif %}
-    </div>
-  </div>
-</div>
           </div>
         </div>
       </div>
@@ -220,6 +206,22 @@
   </div>
 </section>
 <!-- shop-details-area end -->
+
+<!-- Style pour les avis -->
+<style>
+    .reviewer-avatar img, .default-avatar {
+        object-fit: cover;
+        border: 1px solid #ddd;
+    }
+    
+    .review-rating {
+        font-size: 18px;
+    }
+    
+    .review-item {
+        border-left: 3px solid #ffc107;
+    }
+</style>
 
 <!-- related products area start -->
 <section class="related-product pt-100 pb-95 grey-bg">
@@ -259,36 +261,5 @@
     </div>
   </div>
 </section>
-<style>
-  .review-container {
-    padding: 15px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-  }
-  
-  .reviewer-avatar img, .default-avatar {
-    object-fit: cover;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  }
-  
-  .review-rating {
-    font-size: 18px;
-  }
-  
-  .review-comment p {
-    margin-bottom: 0;
-  }
-  
-  hr {
-    margin-top: 1.5rem;
-    margin-bottom: 1.5rem;
-    border-width: 1px;
-  }
-  
-  .no-reviews {
-    background-color: #f9f9f9;
-    border-radius: 8px;
-  }
-</style>
 <!-- related products area end -->
 {% endblock %}
