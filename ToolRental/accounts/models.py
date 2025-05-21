@@ -7,7 +7,7 @@ class Profile(models.Model):
     USER_TYPE_CHOICES = [
         ('locataire', 'Locataire'),
         ('proprietaire', 'Propriétaire'),
-        ('admin', 'Administrateur'),
+        # ('admin', 'Administrateur'),
     ]
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
