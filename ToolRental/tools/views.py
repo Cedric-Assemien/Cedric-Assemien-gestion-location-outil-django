@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.contrib import messages
 from .models import Tool, Category, ToolImage
 from .forms import ToolForm, ToolImageFormSet
+from reservations.models import Reservation
 
 def home(request):
     # Récupération des outils à afficher sur la page d'accueil
@@ -63,7 +64,7 @@ def tool_detail(request, tool_id):
     user_has_reviewed = False
     
     if request.user.is_authenticated:
-        from reservations.models import Reservation
+       
         user_rentals = Reservation.objects.filter(
             renter=request.user,
             tool=tool,

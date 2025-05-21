@@ -54,6 +54,17 @@
             >
               Donner un avis
             </button>
+            {% elif reservation.status == 'completed' and reservation.review %}
+            <!-- Afficher les étoiles de notation -->
+            <div class="d-flex align-items-center">
+              {% for i in '12345' %}
+                {% if forloop.counter <= reservation.review.rating %}
+                  <i class="fas fa-star text-warning"></i>
+                {% else %}
+                  <i class="far fa-star text-warning"></i>
+                {% endif %}
+              {% endfor %}
+            </div>
             {% endif %}
           </td>
         </tr>
@@ -86,7 +97,10 @@
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
+              <div class="alert alert-success" role="alert" id="successMessage{{ reservation.id }}" style="display: none;"></div>
+              <div class="alert alert-danger" role="alert" id="errorMessage{{ reservation.id }}" style="display: none;"></div>
               <form
+                id="reviewForm{{ reservation.id }}"
                 method="post"
                 action="{% url 'reviews:submit_review' reservation.id %}"
               >
@@ -95,7 +109,7 @@
                   <div class="form-group">
                     <label for="rating{{ reservation.id }}">Note (1-5)</label>
                     <div class="rating">
-                      {% for i in '12345' %}
+                      {% for i in '54321' %}
                       <input
                         type="radio"
                         name="rating"
@@ -149,6 +163,26 @@
   {% endif %}
 </div>
 
+<!-- Modal pour afficher les messages -->
+<div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="messageModalLabel">Message</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="messageContent"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Ajout de style pour les étoiles d'évaluation -->
 <style>
   .rating {
@@ -171,4 +205,63 @@
     color: #ffc107;
   }
 </style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Gestion des messages Django
+    {% if messages %}
+      var messageContent = '';
+      var messageClass = '';
+      {% for message in messages %}
+        messageContent = "{{ message }}";
+        messageClass = "{{ message.tags }}";
+      {% endfor %}
+      
+      if (messageContent) {
+        document.getElementById('messageContent').textContent = messageContent;
+        document.getElementById('messageModalLabel').textContent = messageClass.includes('error') ? 'Erreur' : 'Succès';
+        $('#messageModal').modal('show');
+      }
+    {% endif %}
+
+    // Ajouter la gestion AJAX pour les formulaires d'avis
+    {% for reservation in reservations %}
+      {% if reservation.status == 'completed' and not reservation.review %}
+        $('#reviewForm{{ reservation.id }}').on('submit', function(e) {
+          e.preventDefault();
+          var form = $(this);
+          var url = form.attr('action');
+          
+          $.ajax({
+            type: 'POST',
+            url: url,
+            data: form.serialize(),
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+              if (response.status === 'success') {
+                $('#successMessage{{ reservation.id }}').text(response.message).show();
+                $('#errorMessage{{ reservation.id }}').hide();
+                
+                // Masquer le formulaire après 3 secondes et actualiser la page
+                setTimeout(function() {
+                  $('#reviewModal{{ reservation.id }}').modal('hide');
+                  location.reload();
+                }, 3000);
+              } else {
+                $('#errorMessage{{ reservation.id }}').text(response.message).show();
+                $('#successMessage{{ reservation.id }}').hide();
+              }
+            },
+            error: function(xhr, status, error) {
+              $('#errorMessage{{ reservation.id }}').text('Une erreur est survenue. Veuillez réessayer.').show();
+              $('#successMessage{{ reservation.id }}').hide();
+            }
+          });
+        });
+      {% endif %}
+    {% endfor %}
+  });
+</script>
 {% endblock %}
