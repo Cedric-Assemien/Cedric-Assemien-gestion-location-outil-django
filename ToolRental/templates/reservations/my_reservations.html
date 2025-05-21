@@ -1,62 +1,174 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends 'base.html' %} 
+{% load static %} 
 
-{% block title %}Mes Réservations - ToolRental{% endblock %}
+{% block title %}Mes Réservations - ToolRental{% endblock %} 
 
 {% block content %}
 <div class="container my-5">
-    <h1 class="mb-4">Mes Réservations</h1>
-    
-    {% if reservations %}
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Outil</th>
-                        <th>Propriétaire</th>
-                        <th>Date de début</th>
-                        <th>Date de fin</th>
-                        <th>Prix total</th>
-                        <th>Statut</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for reservation in reservations %}
-                        <tr>
-                            <td>
-                                <a href="{% url 'tools:detail' reservation.tool.id %}">
-                                    {{ reservation.tool.name }}
-                                </a>
-                            </td>
-                            <td>{{ reservation.tool.owner.username }}</td>
-                            <td>{{ reservation.start_date|date:"d/m/Y" }}</td>
-                            <td>{{ reservation.end_date|date:"d/m/Y" }}</td>
-                            <td>{{ reservation.total_price }} €</td>
-                            <td>
-                                <span class="badge badge-{% if reservation.status == 'confirmed' %}success{% elif reservation.status == 'pending' %}warning{% elif reservation.status == 'canceled' %}danger{% else %}secondary{% endif %}">
-                                    {{ reservation.get_status_display }}
-                                </span>
-                            </td>
-                            <td>
-                                {% if reservation.status == 'pending' %}
-                                    <a href="#" class="btn btn-sm btn-danger">Annuler</a>
-    {% endif %}
-                                
-                                {% if reservation.status == 'completed' and not reservation.review %}
-                                    <a href="#" class="btn btn-sm btn-primary">Donner un avis</a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-</div>
-    {% else %}
-        <div class="alert alert-info">
-            <p>Vous n'avez pas encore de réservations.</p>
-            <a href="{% url 'tools:list' %}" class="btn btn-primary mt-2">Explorer les outils disponibles</a>
+  <h1 class="mb-4">Mes Réservations</h1>
+
+  {% if reservations %}
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead class="thead-dark">
+        <tr>
+          <th>Outil</th>
+          <th>Propriétaire</th>
+          <th>Date de début</th>
+          <th>Date de fin</th>
+          <th>Prix total</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for reservation in reservations %}
+        <tr>
+          <td>
+            <a href="{% url 'tools:detail' reservation.tool.id %}">
+              {{ reservation.tool.name }}
+            </a>
+          </td>
+          <td>{{ reservation.tool.owner.username }}</td>
+          <td>{{ reservation.start_date|date:"d/m/Y" }}</td>
+          <td>{{ reservation.end_date|date:"d/m/Y" }}</td>
+          <td>{{ reservation.total_price }} €</td>
+          <td>
+            <span
+              class="badge badge-{% if reservation.status == 'confirmed' %}success{% elif reservation.status == 'pending' %}warning{% elif reservation.status == 'canceled' %}danger{% else %}secondary{% endif %}"
+            >
+              {{ reservation.get_status_display }}
+            </span>
+          </td>
+          <td>
+            {% if reservation.status == 'pending' %}
+            <a href="#" class="btn btn-sm btn-danger">Annuler</a>
+            {% endif %}
+            
+            {% if reservation.status == 'completed' and not reservation.review %}
+            <button
+              type="button"
+              class="btn btn-sm btn-primary"
+              data-toggle="modal"
+              data-target="#reviewModal{{ reservation.id }}"
+            >
+              Donner un avis
+            </button>
+            {% endif %}
+          </td>
+        </tr>
+
+        <!-- Modal pour laisser un avis -->
+        {% if reservation.status == 'completed' and not reservation.review %}
+        <div
+          class="modal fade"
+          id="reviewModal{{ reservation.id }}"
+          tabindex="-1"
+          role="dialog"
+          aria-labelledby="reviewModalLabel{{ reservation.id }}"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5
+                  class="modal-title"
+                  id="reviewModalLabel{{ reservation.id }}"
+                >
+                  Donner un avis sur {{ reservation.tool.name }}
+                </h5>
+                <button
+                  type="button"
+                  class="close"
+                  data-dismiss="modal"
+                  aria-label="Close"
+                >
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <form
+                method="post"
+                action="{% url 'reviews:submit_review' reservation.id %}"
+              >
+                {% csrf_token %}
+                <div class="modal-body">
+                  <div class="form-group">
+                    <label for="rating{{ reservation.id }}">Note (1-5)</label>
+                    <div class="rating">
+                      {% for i in '12345' %}
+                      <input
+                        type="radio"
+                        name="rating"
+                        id="star{{ i }}{{ reservation.id }}"
+                        value="{{ i }}"
+                        required
+                      />
+                      <label for="star{{ i }}{{ reservation.id }}">☆</label>
+                      {% endfor %}
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="comment{{ reservation.id }}">Commentaire</label>
+                    <textarea
+                      class="form-control"
+                      id="comment{{ reservation.id }}"
+                      name="comment"
+                      rows="4"
+                      required
+                    ></textarea>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-dismiss="modal"
+                  >
+                    Annuler
+                  </button>
+                  <button type="submit" class="btn btn-primary">
+                    Soumettre
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
-    {% endif %}
+        {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="alert alert-info">
+    <p>Vous n'avez pas encore de réservations.</p>
+    <a href="{% url 'tools:list' %}" class="btn btn-primary mt-2"
+      >Explorer les outils disponibles</a
+    >
+  </div>
+  {% endif %}
 </div>
+
+<!-- Ajout de style pour les étoiles d'évaluation -->
+<style>
+  .rating {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+  }
+  .rating input {
+    display: none;
+  }
+  .rating label {
+    font-size: 30px;
+    color: #ddd;
+    cursor: pointer;
+    margin-right: 5px;
+  }
+  .rating input:checked ~ label,
+  .rating label:hover,
+  .rating label:hover ~ label {
+    color: #ffc107;
+  }
+</style>
 {% endblock %}

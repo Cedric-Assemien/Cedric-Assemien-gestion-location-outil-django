@@ -24,7 +24,7 @@ urlpatterns = [
     path('', include('tools.urls')),
     path('accounts/', include('accounts.urls')),
     path('reservations/', include('reservations.urls')),
-    path('reviews/', include('reviews.urls')),
+    path('reviews/', include('reviews.urls', namespace='reviews')),
 ]
 
 # Ajouter les URLs pour les fichiers média en développement
