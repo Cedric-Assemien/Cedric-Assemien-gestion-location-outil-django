@@ -1,0 +1,3 @@
+resources:
+  - toolrental-deployment.yaml
+  - toolrental-service.yaml
