@@ -14,9 +14,9 @@ spec:
       labels:
         app: toolrental
     spec:
-      containers:
+     containers:
       - name: toolrental-container
-        image: cedricassemien/toolrental:latest  # Remplace par ton image Docker
+        image: cedricassemien/toolrental:latest 
         ports:
         - containerPort: 8000
         env:
@@ -24,3 +24,10 @@ spec:
           value: "ToolRental.settings"
         - name: ALLOWED_HOSTS
           value: "*"
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
